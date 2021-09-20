@@ -45,7 +45,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GridLabelRenderer;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.DataPointInterface;
+import com.jjoe64.graphview.series.LineGraphSeries;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordCollection;
+import com.kyivaigroup.bluetoothsdpsensor.record.RecordDP;
+
+import java.util.List;
 
 /**
  * This fragment controls Bluetooth to communicate with other devices.
@@ -62,6 +70,12 @@ public class BluetoothChatFragment extends Fragment {
     private ListView mConversationView;
     private EditText mOutEditText;
     private Button mSendButton;
+    private GraphView mGraphView;
+    private TextView mTextViewTemperature;
+    private TextView mTextViewHumidity;
+    private TextView mTextViewPressure;
+
+    private final LineGraphSeries<DataPointInterface> mDiffPressureLine = new LineGraphSeries<>();
 
     /**
      * Array adapter for the conversation thread
@@ -116,12 +130,28 @@ public class BluetoothChatFragment extends Fragment {
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
-                    mConversationArrayAdapter.add("TX:  " + writeMessage);
+                    mConversationArrayAdapter.add(writeMessage);
                     break;
                 case Constants.MESSAGE_READ:
                     // construct a string from the valid bytes in the buffer
                     RecordCollection collection = (RecordCollection) msg.obj;
-                    mConversationArrayAdapter.add("RX:  " + collection.summary());
+                    for (RecordDP record : collection.recordsDP) {
+                        DataPoint point = new DataPoint(record.time / 1e6, record.diffPressureRaw);
+                        mDiffPressureLine.appendData(point, false, 10000);
+                    }
+                    if (collection.recordsDP.length > 1) {
+//                        DataPoint[] dataPoints = collection.toDataPoints();
+//                        mGraphView.addSeries(new LineGraphSeries<>(dataPoints));
+                        mGraphView.getViewport().scrollToEnd();
+//                        mGraphView.onDataChanged(false, false);
+                    }
+                    if (collection.temperature != null) {
+                        mTextViewTemperature.setText(getString(R.string.temperature, collection.temperature));
+                    }
+                    if (collection.pressureHumidity != null) {
+                        mTextViewPressure.setText(getString(R.string.atm_pressure, collection.pressureHumidity.pressure));
+                        mTextViewHumidity.setText(getString(R.string.humidity, collection.pressureHumidity.humidity));
+                    }
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
@@ -208,6 +238,22 @@ public class BluetoothChatFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        mGraphView = view.findViewById(R.id.graph);
+        GridLabelRenderer gridLabel = mGraphView.getGridLabelRenderer();
+        gridLabel.setHorizontalAxisTitle("Time,  us");
+        gridLabel.setVerticalAxisTitle("ΔP,  Pa");
+        mGraphView.getViewport().setScrollable(true); // enables horizontal scrolling
+        mGraphView.getViewport().setScrollableY(true); // enables vertical scrolling
+        mGraphView.getViewport().setScalable(true); // enables horizontal zooming and scrolling
+        mGraphView.getViewport().setScalableY(true); // enables vertical zooming and scrolling
+
+        mDiffPressureLine.setAnimated(false);
+        mGraphView.addSeries(mDiffPressureLine);
+
+        mTextViewHumidity = view.findViewById(R.id.text_humidity);
+        mTextViewPressure = view.findViewById(R.id.text_atm_pressure);
+        mTextViewTemperature = view.findViewById(R.id.text_temperature);
+
         mConversationView = view.findViewById(R.id.sent_commands_list);
         mOutEditText = view.findViewById(R.id.command_tx);
         mSendButton = view.findViewById(R.id.button_send);

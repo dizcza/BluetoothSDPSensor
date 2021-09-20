@@ -45,6 +45,12 @@
             android:text="@string/atm_pressure" />
 
         <TextView
+            android:id="@+id/text_humidity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/humidity" />
+
+        <TextView
             android:id="@+id/text_status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
