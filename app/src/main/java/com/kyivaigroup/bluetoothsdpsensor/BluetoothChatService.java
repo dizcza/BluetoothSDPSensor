@@ -332,7 +332,7 @@ public class BluetoothChatService {
                         mHandler.obtainMessage(Constants.MESSAGE_READ, collection).sendToTarget();
                     }
 
-                    sleep(50);
+                    sleep(100);
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionError("Device connection was lost");

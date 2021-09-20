@@ -45,22 +45,20 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.GridLabelRenderer;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.DataPointInterface;
-import com.jjoe64.graphview.series.LineGraphSeries;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordCollection;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordDP;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * This fragment controls Bluetooth to communicate with other devices.
  */
 public class BluetoothChatFragment extends Fragment {
-
-    private static final String TAG = "BluetoothChatFragment";
 
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE = 2;
@@ -70,12 +68,10 @@ public class BluetoothChatFragment extends Fragment {
     private ListView mConversationView;
     private EditText mOutEditText;
     private Button mSendButton;
-    private GraphView mGraphView;
+    private SensorLineChart mLineChart;
     private TextView mTextViewTemperature;
     private TextView mTextViewHumidity;
     private TextView mTextViewPressure;
-
-    private final LineGraphSeries<DataPointInterface> mDiffPressureLine = new LineGraphSeries<>();
 
     /**
      * Array adapter for the conversation thread
@@ -117,6 +113,7 @@ public class BluetoothChatFragment extends Fragment {
                         case BluetoothChatService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
                             mConversationArrayAdapter.clear();
+                            mLineChart.clear();
                             break;
                         case BluetoothChatService.STATE_CONNECTING:
                             setStatus(R.string.title_connecting);
@@ -135,16 +132,8 @@ public class BluetoothChatFragment extends Fragment {
                 case Constants.MESSAGE_READ:
                     // construct a string from the valid bytes in the buffer
                     RecordCollection collection = (RecordCollection) msg.obj;
-                    for (RecordDP record : collection.recordsDP) {
-                        DataPoint point = new DataPoint(record.time / 1e6, record.diffPressureRaw);
-                        mDiffPressureLine.appendData(point, false, 10000);
-                    }
-                    if (collection.recordsDP.length > 1) {
-//                        DataPoint[] dataPoints = collection.toDataPoints();
-//                        mGraphView.addSeries(new LineGraphSeries<>(dataPoints));
-                        mGraphView.getViewport().scrollToEnd();
-//                        mGraphView.onDataChanged(false, false);
-                    }
+                    mLineChart.update(collection.recordsDP);
+
                     if (collection.temperature != null) {
                         mTextViewTemperature.setText(getString(R.string.temperature, collection.temperature));
                     }
@@ -238,17 +227,10 @@ public class BluetoothChatFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        mGraphView = view.findViewById(R.id.graph);
-        GridLabelRenderer gridLabel = mGraphView.getGridLabelRenderer();
-        gridLabel.setHorizontalAxisTitle("Time,  us");
-        gridLabel.setVerticalAxisTitle("ΔP,  Pa");
-        mGraphView.getViewport().setScrollable(true); // enables horizontal scrolling
-        mGraphView.getViewport().setScrollableY(true); // enables vertical scrolling
-        mGraphView.getViewport().setScalable(true); // enables horizontal zooming and scrolling
-        mGraphView.getViewport().setScalableY(true); // enables vertical zooming and scrolling
-
-        mDiffPressureLine.setAnimated(false);
-        mGraphView.addSeries(mDiffPressureLine);
+        mLineChart = view.findViewById(R.id.graph);
+        mLineChart.setNoDataText("Waiting for sensor data...");
+        mLineChart.setDescription(null);
+        mLineChart.setMaxVisibleValueCount(5);
 
         mTextViewHumidity = view.findViewById(R.id.text_humidity);
         mTextViewPressure = view.findViewById(R.id.text_atm_pressure);

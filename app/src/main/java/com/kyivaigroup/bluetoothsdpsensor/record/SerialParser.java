@@ -32,11 +32,7 @@ public class SerialParser {
                     break;
             }
         }
-        return hasRecords();
-    }
-
-    public boolean hasRecords() {
-        return mRecordsDP.size() > 0 || mRecordsP.size() > 0 || mTemperatures.size() > 0;
+        return mRecordsDP.size() > 0;  // new records available
     }
 
     public RecordCollection consumeRecords() {
