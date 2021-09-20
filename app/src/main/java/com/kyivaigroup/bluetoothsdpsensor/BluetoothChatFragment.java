@@ -226,15 +226,13 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         mLineChart = view.findViewById(R.id.graph);
-        mLineChart.setNoDataText("Waiting for sensor data...");
-        mLineChart.setDescription(null);
-        mLineChart.setMaxVisibleValueCount(5);
 
         mTextViewHumidity = view.findViewById(R.id.text_humidity);
         mTextViewPressure = view.findViewById(R.id.text_atm_pressure);
         mTextViewTemperature = view.findViewById(R.id.text_temperature);
 
         mConversationView = view.findViewById(R.id.sent_commands_list);
+        mConversationView.setEmptyView(view.findViewById(R.id.empty_list_item));
 
         mOutEditText = view.findViewById(R.id.command_tx);
         // Initialize the compose field with a listener for the return key
@@ -301,7 +299,15 @@ public class BluetoothChatFragment extends Fragment {
      * @param resId a string resource ID
      */
     private void setStatus(int resId) {
-        setStatus(getString(resId));
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (null == activity) {
+            return;
+        }
+        final ActionBar actionBar = activity.getSupportActionBar();
+        if (null == actionBar) {
+            return;
+        }
+        actionBar.setSubtitle(resId);
     }
 
     /**

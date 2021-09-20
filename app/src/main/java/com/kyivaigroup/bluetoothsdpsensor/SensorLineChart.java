@@ -1,6 +1,7 @@
 package com.kyivaigroup.bluetoothsdpsensor;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -22,19 +23,30 @@ public class SensorLineChart extends LineChart {
 
     public SensorLineChart(Context context) {
         super(context);
+        prepare(context);
     }
 
     public SensorLineChart(Context context, AttributeSet attrs) {
         super(context, attrs);
+        prepare(context);
     }
 
     public SensorLineChart(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        prepare(context);
     }
 
     public void clear() {
         super.clear();
         mChartEntries.clear();
+    }
+
+    public void prepare(Context context) {
+        setNoDataText("Waiting for sensor data...");
+        setDescription(null);
+        int appColor = context.getResources().getColor(R.color.ic_launcher_background);
+        Paint paint = getPaint(LineChart.PAINT_INFO);
+        paint.setColor(appColor);
     }
 
     public void update(RecordDP[] recordsDP) {
@@ -46,7 +58,6 @@ public class SensorLineChart extends LineChart {
         if (tick - mLastInvalidate > INVALIDATE_PERIOD) {
             LineDataSet dataset = new LineDataSet(mChartEntries, CHART_LABEL);
             LineData data = new LineData(dataset);
-            data.setDrawValues(true);
             setData(data);
             invalidate();
             mLastInvalidate = tick;

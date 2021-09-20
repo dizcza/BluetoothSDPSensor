@@ -25,5 +25,6 @@
     <string name="atm_pressure">Atm. Pressure: <xliff:g id="atm_pressure_val" example="0">%.0f</xliff:g> Pa</string>
     <string name="humidity">Humidity: <xliff:g id="humidity_val" example="0">%.1f</xliff:g></string>
     <string name="temperature">t° <xliff:g id="temperature_val" example="0">%.1f</xliff:g> C</string>
+    <string name="empty_sent_commands">Sent commands</string>
 
 </resources>
