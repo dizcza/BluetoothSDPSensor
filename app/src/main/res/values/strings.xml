@@ -19,7 +19,8 @@
     <string name="button_scan">Scan for devices</string>
 
     <!-- Options Menu -->
-    <string name="secure_connect">Connect a device</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
     <string name="command_tx_hint">Enter the command to send</string>
     <string name="atm_pressure">Atm. Pressure: <xliff:g id="atm_pressure_val" example="0">%.0f</xliff:g> Pa</string>
     <string name="humidity">Humidity: <xliff:g id="humidity_val" example="0">%.1f</xliff:g></string>

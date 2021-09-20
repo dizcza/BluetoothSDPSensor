@@ -45,15 +45,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordCollection;
-import com.kyivaigroup.bluetoothsdpsensor.record.RecordDP;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This fragment controls Bluetooth to communicate with other devices.
@@ -67,11 +59,11 @@ public class BluetoothChatFragment extends Fragment {
     // Layout Views
     private ListView mConversationView;
     private EditText mOutEditText;
-    private Button mSendButton;
     private SensorLineChart mLineChart;
     private TextView mTextViewTemperature;
     private TextView mTextViewHumidity;
     private TextView mTextViewPressure;
+    private MenuItem mConnectMenu;
 
     /**
      * Array adapter for the conversation thread
@@ -112,6 +104,7 @@ public class BluetoothChatFragment extends Fragment {
                     switch (msg.arg1) {
                         case BluetoothChatService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
+                            mConnectMenu.setTitle(R.string.disconnect);
                             mConversationArrayAdapter.clear();
                             mLineChart.clear();
                             break;
@@ -120,6 +113,10 @@ public class BluetoothChatFragment extends Fragment {
                             break;
                         case BluetoothChatService.STATE_NONE:
                             setStatus(R.string.title_not_connected);
+                            if (mConnectMenu != null) {
+                                // null when the app is launching
+                                mConnectMenu.setTitle(R.string.connect);
+                            }
                             break;
                     }
                     break;
@@ -237,8 +234,24 @@ public class BluetoothChatFragment extends Fragment {
         mTextViewTemperature = view.findViewById(R.id.text_temperature);
 
         mConversationView = view.findViewById(R.id.sent_commands_list);
+
         mOutEditText = view.findViewById(R.id.command_tx);
-        mSendButton = view.findViewById(R.id.button_send);
+        // Initialize the compose field with a listener for the return key
+        mOutEditText.setOnEditorActionListener((v, actionId, event) -> {
+            // If the action is a key-up event on the return key, send the message
+            if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
+                String message = v.getText().toString();
+                sendMessage(message);
+            }
+            return true;
+        });
+
+        Button sendButton = view.findViewById(R.id.button_send);
+        sendButton.setOnClickListener(buttonView -> {
+            // Send a message using content of the edit text widget
+            String message = mOutEditText.getText().toString();
+            sendMessage(message);
+        } );
     }
 
     /**
@@ -254,32 +267,8 @@ public class BluetoothChatFragment extends Fragment {
 
         mConversationView.setAdapter(mConversationArrayAdapter);
 
-        // Initialize the compose field with a listener for the return key
-        mOutEditText.setOnEditorActionListener(mWriteListener);
-
-        // Initialize the send button with a listener that for click events
-        mSendButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View buttonView) {
-                // Send a message using content of the edit text widget
-                String message = mOutEditText.getText().toString();
-                sendMessage(message);
-            }
-        });
-
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BluetoothChatService(mHandler);
-    }
-
-    /**
-     * Makes this device discoverable for 300 seconds (5 minutes).
-     */
-    private void ensureDiscoverable() {
-        if (mBluetoothAdapter.getScanMode() !=
-                BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-            startActivity(discoverableIntent);
-        }
     }
 
     /**
@@ -304,21 +293,6 @@ public class BluetoothChatFragment extends Fragment {
             mOutEditText.setText("");
         }
     }
-
-    /**
-     * The action listener for the EditText widget, to listen for the return key
-     */
-    private final TextView.OnEditorActionListener mWriteListener
-            = new TextView.OnEditorActionListener() {
-        public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-            // If the action is a key-up event on the return key, send the message
-            if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
-                String message = view.getText().toString();
-                sendMessage(message);
-            }
-            return true;
-        }
-    };
 
     /**
      * Updates the status on the action bar.
@@ -376,6 +350,7 @@ public class BluetoothChatFragment extends Fragment {
                         activity.finish();
                     }
                 }
+                break;
         }
     }
 
@@ -397,18 +372,29 @@ public class BluetoothChatFragment extends Fragment {
         mChatService.connect(device);
     }
 
+    private void disconnect() {
+        if (mChatService != null) {
+            mChatService.stop();
+        }
+    }
+
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.connect, menu);
+        mConnectMenu = menu.findItem(R.id.connect_scan);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.connect_scan: {
-                // Launch the DeviceListActivity to see devices and do scan
-                Intent serverIntent = new Intent(getActivity(), DeviceListActivity.class);
-                startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+                if (item.getTitle().equals(getString(R.string.connect))) {
+                    // Launch the DeviceListActivity to see devices and do scan
+                    Intent serverIntent = new Intent(getActivity(), DeviceListActivity.class);
+                    startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+                } else {
+                    disconnect();
+                }
                 return true;
             }
         }

@@ -9,7 +9,7 @@
     android:paddingBottom="@dimen/padding_global"
     android:paddingLeft="@dimen/padding_global"
     android:paddingRight="@dimen/padding_global"
-    tools:context=".MainFragment">
+    tools:context=".BluetoothChatFragment">
 
     <com.kyivaigroup.bluetoothsdpsensor.SensorLineChart
         android:layout_weight="1"
