@@ -110,7 +110,7 @@ public class BluetoothChatFragment extends Fragment {
                 case Constants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case BluetoothChatService.STATE_CONNECTED:
-                            setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
+                            setStatus(getActivity().getString(R.string.title_connected_to, mConnectedDeviceName));
                             BluetoothChatFragment.this.sendMessage(Constants.INFO);
                             mConnectMenu.setTitle(R.string.disconnect);
                             mConversationArrayAdapter.clear();
@@ -255,18 +255,19 @@ public class BluetoothChatFragment extends Fragment {
 
     private void onRecordsReceived(RecordCollection collection) {
         mLineChart.update(collection);
+        Activity activity = getActivity();
 
         if (collection.temperature != null) {
-            mTextViewTemperature.setText(getString(R.string.temperature, collection.temperature));
+            mTextViewTemperature.setText(activity.getString(R.string.temperature, collection.temperature));
         }
         if (collection.pressureHumidity != null) {
-            mTextViewPressure.setText(getString(R.string.atm_pressure, collection.pressureHumidity.pressure));
-            mTextViewHumidity.setText(getString(R.string.humidity, collection.pressureHumidity.humidity));
+            mTextViewPressure.setText(activity.getString(R.string.atm_pressure, collection.pressureHumidity.pressure));
+            mTextViewHumidity.setText(activity.getString(R.string.humidity, collection.pressureHumidity.humidity));
         }
         if (collection.status != null) {
             RecordStatus status = collection.status;
-            mTextViewStatusQueueSize.setText(getString(R.string.status_queue_size, status.messagesCurr, status.messagesMax));
-            mTextViewStatusReadSensor.setText(getString(R.string.status_read_sensor, status.readDurationMax, status.readsFailed));
+            mTextViewStatusQueueSize.setText(activity.getString(R.string.status_queue_size, status.messagesCurr, status.messagesMax));
+            mTextViewStatusReadSensor.setText(activity.getString(R.string.status_read_sensor, status.readDurationMax, status.readsFailed));
         }
     }
 
@@ -405,7 +406,7 @@ public class BluetoothChatFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.connect_scan: {
-                if (item.getTitle().equals(getString(R.string.connect))) {
+                if (item.getTitle().equals(getActivity().getString(R.string.connect))) {
                     // Launch the DeviceListActivity to see devices and do scan
                     Intent serverIntent = new Intent(getActivity(), DeviceListActivity.class);
                     startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);

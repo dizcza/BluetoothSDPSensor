@@ -17,11 +17,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SensorLineChart extends LineChart {
-    private static final long INVALIDATE_PERIOD = 500;  // ms
     private static final int MAX_POINTS_KEEP = 10_000;
     private static final String CHART_LABEL = "Differential pressure, Pa";
-
-    private long mLastInvalidate = 0;
 
     private List<Entry> mChartEntries = new ArrayList<>();
 
@@ -68,13 +65,9 @@ public class SensorLineChart extends LineChart {
             mChartEntries = mChartEntries.subList(mChartEntries.size() / 2,
                     mChartEntries.size() - 1);
         }
-        long tick = System.currentTimeMillis();
-        if (tick - mLastInvalidate > INVALIDATE_PERIOD) {
-            LineDataSet dataset = new LineDataSet(mChartEntries, CHART_LABEL);
-            LineData data = new LineData(dataset);
-            setData(data);
-            invalidate();
-            mLastInvalidate = tick;
-        }
+        LineDataSet dataset = new LineDataSet(mChartEntries, CHART_LABEL);
+        LineData data = new LineData(dataset);
+        setData(data);
+        invalidate();
     }
 }
