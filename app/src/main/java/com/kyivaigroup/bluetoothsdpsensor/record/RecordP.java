@@ -5,8 +5,8 @@ import androidx.annotation.NonNull;
 import java.util.Locale;
 
 public class RecordP {
-    public float pressure;
-    public float humidity;
+    public final float pressure;
+    public final float humidity;
 
     public RecordP(float pressure, float humidity) {
         this.pressure = pressure;

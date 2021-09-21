@@ -326,7 +326,8 @@ public class BluetoothChatService {
                     // Read from the InputStream
                     nbytes = mmInStream.read(buffer);
 
-                    if (mmSerialParser.receive(buffer, nbytes)) {
+                    mmSerialParser.receive(buffer, nbytes);
+                    if (mmSerialParser.hasRecords()) {
                         // Send the records to the UI Activity
                         RecordCollection collection = mmSerialParser.consumeRecords();
                         mHandler.obtainMessage(Constants.MESSAGE_READ, collection).sendToTarget();

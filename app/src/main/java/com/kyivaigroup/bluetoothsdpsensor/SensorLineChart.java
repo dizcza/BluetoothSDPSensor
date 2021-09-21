@@ -5,21 +5,25 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.kyivaigroup.bluetoothsdpsensor.record.RecordCollection;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordDP;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SensorLineChart extends LineChart {
     private static final long INVALIDATE_PERIOD = 500;  // ms
+    private static final int MAX_POINTS_KEEP = 10_000;
     private static final String CHART_LABEL = "Differential pressure, Pa";
 
     private long mLastInvalidate = 0;
 
-    private final List<Entry> mChartEntries = new ArrayList<>();
+    private List<Entry> mChartEntries = new ArrayList<>();
 
     public SensorLineChart(Context context) {
         super(context);
@@ -49,10 +53,20 @@ public class SensorLineChart extends LineChart {
         paint.setColor(appColor);
     }
 
-    public void update(RecordDP[] recordsDP) {
-        for (RecordDP record : recordsDP) {
+    public void update(RecordCollection collection) {
+        if (collection.sensorInfo != null) {
+            Description description = new Description();
+            description.setText(collection.sensorInfo.toString());
+            setDescription(description);
+        }
+        for (RecordDP record : collection.recordsDP) {
             Entry entry = new Entry(record.time / 1e6f, record.diffPressureRaw);
             mChartEntries.add(entry);
+        }
+        if (mChartEntries.size() > MAX_POINTS_KEEP) {
+            // truncate
+            mChartEntries = mChartEntries.subList(mChartEntries.size() / 2,
+                    mChartEntries.size() - 1);
         }
         long tick = System.currentTimeMillis();
         if (tick - mLastInvalidate > INVALIDATE_PERIOD) {

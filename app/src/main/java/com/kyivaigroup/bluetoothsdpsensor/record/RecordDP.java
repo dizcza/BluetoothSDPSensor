@@ -14,11 +14,11 @@ class TimeDeltaFormatter {
         String timeDelta;
         if (hh > 0) {
             timeDelta = String.format(Locale.getDefault(),
-                    "%02d %02d:%02d.%03d %03d",
+                    "%02d %02d:%02d.%03d.%03d",
                     hh, mm, (ss % 60), ms, (us % 1000));
         } else {
             timeDelta = String.format(Locale.getDefault(),
-                    "%02d:%02d.%03d %03d",
+                    "%02d:%02d.%03d.%03d",
                     mm, (ss % 60), ms, (us % 1000));
         }
         return timeDelta;
@@ -29,8 +29,8 @@ class TimeDeltaFormatter {
 public class RecordDP {
     private static final int PRESSURE_SCALE = 60;
 
-    public short diffPressureRaw;
-    public long time;
+    public final short diffPressureRaw;
+    public final long time;
 
     public RecordDP(short diffPressureRaw, long time) {
         this.diffPressureRaw = diffPressureRaw;

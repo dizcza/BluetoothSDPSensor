@@ -32,4 +32,8 @@ public interface Constants {
     String DEVICE_NAME = "device_name";
     String TOAST = "toast";
 
+    // Sensor commands
+    String INFO = "info";
+    String RESTART = "restart";
+
 }

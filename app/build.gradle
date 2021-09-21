@@ -8,7 +8,7 @@ android {
     defaultConfig {
         applicationId "com.kyivaigroup.bluetoothsdpsensor"
         minSdk 14
-        targetSdk 25
+        targetSdk 30
     }
 
     buildTypes {

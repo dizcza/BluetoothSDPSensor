@@ -46,7 +46,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
+import com.github.mikephil.charting.components.Description;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordCollection;
+import com.kyivaigroup.bluetoothsdpsensor.record.RecordStatus;
+
+import java.util.Locale;
 
 /**
  * This fragment controls Bluetooth to communicate with other devices.
@@ -64,6 +68,8 @@ public class BluetoothChatFragment extends Fragment {
     private TextView mTextViewTemperature;
     private TextView mTextViewHumidity;
     private TextView mTextViewPressure;
+    private TextView mTextViewStatusQueueSize;
+    private TextView mTextViewStatusReadSensor;
     private MenuItem mConnectMenu;
 
     /**
@@ -105,6 +111,7 @@ public class BluetoothChatFragment extends Fragment {
                     switch (msg.arg1) {
                         case BluetoothChatService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
+                            BluetoothChatFragment.this.sendMessage(Constants.INFO);
                             mConnectMenu.setTitle(R.string.disconnect);
                             mConversationArrayAdapter.clear();
                             mLineChart.clear();
@@ -129,16 +136,7 @@ public class BluetoothChatFragment extends Fragment {
                     break;
                 case Constants.MESSAGE_READ:
                     // construct a string from the valid bytes in the buffer
-                    RecordCollection collection = (RecordCollection) msg.obj;
-                    mLineChart.update(collection.recordsDP);
-
-                    if (collection.temperature != null) {
-                        mTextViewTemperature.setText(getString(R.string.temperature, collection.temperature));
-                    }
-                    if (collection.pressureHumidity != null) {
-                        mTextViewPressure.setText(getString(R.string.atm_pressure, collection.pressureHumidity.pressure));
-                        mTextViewHumidity.setText(getString(R.string.humidity, collection.pressureHumidity.humidity));
-                    }
+                    onRecordsReceived((RecordCollection) msg.obj);
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
@@ -230,6 +228,8 @@ public class BluetoothChatFragment extends Fragment {
         mTextViewHumidity = view.findViewById(R.id.text_humidity);
         mTextViewPressure = view.findViewById(R.id.text_atm_pressure);
         mTextViewTemperature = view.findViewById(R.id.text_temperature);
+        mTextViewStatusQueueSize = view.findViewById(R.id.text_status_queue_size);
+        mTextViewStatusReadSensor = view.findViewById(R.id.text_status_read_sensor);
 
         mConversationView = view.findViewById(R.id.sent_commands_list);
         mConversationView.setEmptyView(view.findViewById(R.id.empty_list_item));
@@ -251,6 +251,23 @@ public class BluetoothChatFragment extends Fragment {
             String message = mOutEditText.getText().toString();
             sendMessage(message);
         } );
+    }
+
+    private void onRecordsReceived(RecordCollection collection) {
+        mLineChart.update(collection);
+
+        if (collection.temperature != null) {
+            mTextViewTemperature.setText(getString(R.string.temperature, collection.temperature));
+        }
+        if (collection.pressureHumidity != null) {
+            mTextViewPressure.setText(getString(R.string.atm_pressure, collection.pressureHumidity.pressure));
+            mTextViewHumidity.setText(getString(R.string.humidity, collection.pressureHumidity.humidity));
+        }
+        if (collection.status != null) {
+            RecordStatus status = collection.status;
+            mTextViewStatusQueueSize.setText(getString(R.string.status_queue_size, status.messagesCurr, status.messagesMax));
+            mTextViewStatusReadSensor.setText(getString(R.string.status_read_sensor, status.readDurationMax, status.readsFailed));
+        }
     }
 
     /**
@@ -284,6 +301,7 @@ public class BluetoothChatFragment extends Fragment {
 
         // Check that there's actually something to send
         if (message.length() > 0) {
+            message = String.format(Locale.getDefault(), "/%s\n", message);
             // Get the message bytes and tell the BluetoothChatService to write
             byte[] send = message.getBytes();
             mChatService.write(send);
