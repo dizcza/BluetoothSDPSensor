@@ -27,7 +27,6 @@ class TimeDeltaFormatter {
 
 
 public class RecordDP {
-    private static final int PRESSURE_SCALE = 60;
 
     public final short diffPressureRaw;
     public final long time;
@@ -37,15 +36,11 @@ public class RecordDP {
         this.time = time;
     }
 
-    public float diffPressure() {
-        return ((float) diffPressureRaw) / PRESSURE_SCALE;
-    }
-
     @NonNull
     public String toString() {
         return String.format(Locale.getDefault(),
-                "[%s] %.2f Pa",
+                "[%s] %d",
                 TimeDeltaFormatter.format(time),
-                diffPressure());
+                diffPressureRaw);
     }
 }
