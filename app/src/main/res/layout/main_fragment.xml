@@ -24,25 +24,173 @@
         android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:padding="10dp" >
+        android:padding="5dp" >
 
-        <TextView
-            android:id="@+id/text_temperature"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/temperature" />
+            android:layout_height="70dp"
+            android:orientation="horizontal"
+            >
 
-        <TextView
-            android:id="@+id/text_atm_pressure"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/atm_pressure" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.4"
+                android:background="@drawable/rectangle"
+                android:orientation="horizontal"
+                >
 
-        <TextView
-            android:id="@+id/text_humidity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/humidity" />
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/pressure"
+                    android:contentDescription="@string/atm_pressure_desc" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    >
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="@string/atm_pressure_desc"
+                        android:textSize="@dimen/sensor_text_size_header"
+                        android:layout_gravity="center_horizontal"
+                        android:textAlignment="center"
+                        >
+                    </TextView>
+
+                    <TextView
+                        android:id="@+id/text_atm_pressure"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text=""
+                        android:textSize="@dimen/sensor_text_size"
+                        android:layout_gravity="center_horizontal"
+                        android:textAlignment="center"
+                        >
+                    </TextView>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="@integer/sensor_spacing" >
+            </Space>
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.8"
+                android:background="@drawable/rectangle"
+                android:orientation="horizontal"
+                >
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/temperature"
+                    android:contentDescription="@string/temperature_desc" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    >
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="@string/temperature_desc"
+                        android:textSize="@dimen/sensor_text_size_header"
+                        android:layout_gravity="center_horizontal"
+                        android:textAlignment="center"
+                        >
+                    </TextView>
+
+                    <TextView
+                        android:id="@+id/text_temperature"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text=""
+                        android:textSize="@dimen/sensor_text_size"
+                        android:layout_gravity="center_horizontal"
+                        android:textAlignment="center"
+                        >
+                    </TextView>
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="@integer/sensor_spacing" >
+            </Space>
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/rectangle"
+                android:orientation="horizontal"
+                >
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/humidity"
+                    android:contentDescription="@string/humidity_desc" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    >
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="@string/humidity_desc"
+                        android:textSize="@dimen/sensor_text_size_header"
+                        android:layout_gravity="center_horizontal"
+                        android:textAlignment="center"
+                        >
+                    </TextView>
+
+                    <TextView
+                        android:id="@+id/text_humidity"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text=""
+                        android:textSize="@dimen/sensor_text_size"
+                        android:layout_gravity="center_horizontal"
+                        android:textAlignment="center"
+                        >
+                    </TextView>
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/text_status_queue_size"

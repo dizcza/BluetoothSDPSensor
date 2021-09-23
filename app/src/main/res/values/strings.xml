@@ -22,11 +22,11 @@
     <string name="connect">Connect</string>
     <string name="disconnect">Disconnect</string>
     <string name="command_tx_hint">Enter the command to send</string>
-    <string name="atm_pressure">Atm. Pressure: <xliff:g id="atm_pressure_val" example="0">%.0f</xliff:g> Pa</string>
-    <string name="humidity">Humidity: <xliff:g id="humidity_val" example="0">%.1f</xliff:g></string>
-    <string name="temperature">t° <xliff:g id="temperature_val" example="0">%.1f</xliff:g> C</string>
     <string name="empty_sent_commands">Sent commands</string>
     <string name="status_queue_size">Queue size: current <xliff:g id="queue_curr" example="0">%03d</xliff:g>, max <xliff:g id="queue_max" example="0">%d</xliff:g></string>
     <string name="status_read_sensor">Sensor read max duration <xliff:g id="read_duration_max" example="0">%d</xliff:g>, failed <xliff:g id="read_failed" example="0">%d</xliff:g></string>
+    <string name="atm_pressure_desc">Atm. Pressure, Pa</string>
+    <string name="temperature_desc">Temp. °C</string>
+    <string name="humidity_desc">Humidity, %</string>
 
 </resources>

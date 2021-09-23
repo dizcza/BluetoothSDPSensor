@@ -14,7 +14,7 @@ public class SerialParser {
     private final List<RecordStatus> mRecordsStatus = new ArrayList<>();
     private SensorInfo mSensorInfo;
 
-    private final static Pattern patternDP = Pattern.compile("D(\\d+)t(\\d+)");
+    private final static Pattern patternDP = Pattern.compile("D(-?\\d+)t(\\d+)");
     private final static Pattern patternP = Pattern.compile("P(\\d+)H(\\d+\\.\\d)");
     private final static Pattern patternT = Pattern.compile("T(\\d+\\.\\d)");
     private final static Pattern patternStatus = Pattern.compile("S(\\d+)m(\\d+)f(\\d+)r(\\d+)");

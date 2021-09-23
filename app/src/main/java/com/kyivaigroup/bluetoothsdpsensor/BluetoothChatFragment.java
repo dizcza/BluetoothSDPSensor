@@ -110,7 +110,9 @@ public class BluetoothChatFragment extends Fragment {
                 case Constants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case BluetoothChatService.STATE_CONNECTED:
-                            setStatus(getActivity().getString(R.string.title_connected_to, mConnectedDeviceName));
+                            if (null != activity) {
+                                setStatus(activity.getString(R.string.title_connected_to, mConnectedDeviceName));
+                            }
                             BluetoothChatFragment.this.sendMessage(Constants.INFO);
                             mConnectMenu.setTitle(R.string.disconnect);
                             mConversationArrayAdapter.clear();
@@ -131,7 +133,7 @@ public class BluetoothChatFragment extends Fragment {
                 case Constants.MESSAGE_WRITE:
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
-                    String writeMessage = new String(writeBuf);
+                    String writeMessage = new String(writeBuf).replace("\n", "");
                     mConversationArrayAdapter.add(writeMessage);
                     break;
                 case Constants.MESSAGE_READ:
@@ -256,13 +258,16 @@ public class BluetoothChatFragment extends Fragment {
     private void onRecordsReceived(RecordCollection collection) {
         mLineChart.update(collection);
         Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
 
         if (collection.temperature != null) {
-            mTextViewTemperature.setText(activity.getString(R.string.temperature, collection.temperature));
+            mTextViewTemperature.setText(String.format(Locale.getDefault(), "%.1f", collection.temperature));
         }
         if (collection.pressureHumidity != null) {
-            mTextViewPressure.setText(activity.getString(R.string.atm_pressure, collection.pressureHumidity.pressure));
-            mTextViewHumidity.setText(activity.getString(R.string.humidity, collection.pressureHumidity.humidity));
+            mTextViewPressure.setText(String.format(Locale.getDefault(), "%.0f", collection.pressureHumidity.pressure));
+            mTextViewHumidity.setText(String.format(Locale.getDefault(), "%.1f", collection.pressureHumidity.humidity));
         }
         if (collection.status != null) {
             RecordStatus status = collection.status;
