@@ -235,7 +235,8 @@
                 android:layout_gravity="bottom"
                 android:layout_weight="1"
                 android:hint="@string/command_tx_hint"
-                android:inputType="text" />
+                android:inputType="text"
+                android:autofillHints="info,restart" />
 
             <Button
                 android:id="@+id/button_send"
