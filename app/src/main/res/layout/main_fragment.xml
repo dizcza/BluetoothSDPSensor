@@ -28,7 +28,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="50dp"
             android:orientation="horizontal"
             >
 
@@ -37,37 +37,36 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1.4"
                 android:background="@drawable/rectangle"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 >
 
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/pressure"
-                    android:contentDescription="@string/atm_pressure_desc" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/atm_pressure_desc"
+                    android:textSize="@dimen/sensor_text_size_header"
+                    android:layout_gravity="center_horizontal"
+                    android:textAlignment="center"
+                    >
+                </TextView>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/sensor_padding"
                     >
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:text="@string/atm_pressure_desc"
-                        android:textSize="@dimen/sensor_text_size_header"
-                        android:layout_gravity="center_horizontal"
-                        android:textAlignment="center"
-                        >
-                    </TextView>
+                    <ImageView
+                        android:layout_width="@dimen/sensor_icon"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/pressure"
+                        android:contentDescription="@string/atm_pressure_desc" />
 
                     <TextView
                         android:id="@+id/text_atm_pressure"
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="match_parent"
                         android:text=""
                         android:textSize="@dimen/sensor_text_size"
                         android:layout_gravity="center_horizontal"
@@ -91,37 +90,36 @@
                 android:layout_height="match_parent"
                 android:layout_weight="0.8"
                 android:background="@drawable/rectangle"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 >
 
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/temperature"
-                    android:contentDescription="@string/temperature_desc" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/temperature_desc"
+                    android:textSize="@dimen/sensor_text_size_header"
+                    android:layout_gravity="center_horizontal"
+                    android:textAlignment="center"
+                    >
+                </TextView>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/sensor_padding"
                     >
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:text="@string/temperature_desc"
-                        android:textSize="@dimen/sensor_text_size_header"
-                        android:layout_gravity="center_horizontal"
-                        android:textAlignment="center"
-                        >
-                    </TextView>
+                    <ImageView
+                        android:layout_width="@dimen/sensor_icon"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/temperature"
+                        android:contentDescription="@string/temperature_desc" />
 
                     <TextView
                         android:id="@+id/text_temperature"
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="match_parent"
                         android:text=""
                         android:textSize="@dimen/sensor_text_size"
                         android:layout_gravity="center_horizontal"
@@ -130,7 +128,6 @@
                     </TextView>
 
                 </LinearLayout>
-
 
             </LinearLayout>
 
@@ -147,37 +144,38 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/rectangle"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 >
 
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/humidity"
-                    android:contentDescription="@string/humidity_desc" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/humidity_desc"
+                    android:textSize="@dimen/sensor_text_size_header"
+                    android:layout_gravity="center_horizontal"
+                    android:textAlignment="center"
+                    >
+                </TextView>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/sensor_padding"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp"
                     >
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:text="@string/humidity_desc"
-                        android:textSize="@dimen/sensor_text_size_header"
-                        android:layout_gravity="center_horizontal"
-                        android:textAlignment="center"
-                        >
-                    </TextView>
+                    <ImageView
+                        android:layout_width="@dimen/sensor_icon"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/humidity"
+                        android:contentDescription="@string/humidity_desc" />
 
                     <TextView
                         android:id="@+id/text_humidity"
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="match_parent"
                         android:text=""
                         android:textSize="@dimen/sensor_text_size"
                         android:layout_gravity="center_horizontal"
@@ -187,8 +185,8 @@
 
                 </LinearLayout>
 
-
             </LinearLayout>
+
 
         </LinearLayout>
 
@@ -196,6 +194,7 @@
             android:id="@+id/text_status_queue_size"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="5dp"
             android:text="@string/status_queue_size" />
 
         <TextView
