@@ -317,7 +317,7 @@ public class BluetoothChatService {
         }
 
         public void run() {
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[16284];
             int nbytes;
 
             // Keep listening to the InputStream while connected
@@ -333,7 +333,7 @@ public class BluetoothChatService {
                         mHandler.obtainMessage(Constants.MESSAGE_READ, collection).sendToTarget();
                     }
 
-                    sleep(100);
+                    sleep(50);
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionError("Device connection was lost");

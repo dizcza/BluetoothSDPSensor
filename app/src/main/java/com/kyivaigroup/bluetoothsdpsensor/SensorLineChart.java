@@ -16,7 +16,6 @@ import com.kyivaigroup.bluetoothsdpsensor.record.RecordCollection;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordDP;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SensorLineChart extends LineChart implements OnChartGestureListener {
@@ -66,7 +65,7 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
                 // apply new scaling factor
                 final float rescale = ((float) mPressureScale) / prScale;
                 for (Entry entry : mChartEntries) {
-                    entry.setX(entry.getX() * rescale);
+                    entry.setY(entry.getY() * rescale);
                 }
                 mPressureScale = prScale;
             }
