@@ -4,6 +4,15 @@ Android client app to plot Sensirion SDP Sensor data sent by an ESP32 board (the
 
 Based on the official [BluetoothChat](https://github.com/android/connectivity-samples/tree/master/BluetoothChat) Android app. Powered by the [MPAndroidChart](https://github.com/PhilJay/MPAndroidChart) plotting library.
 
+## Sensors
+
+* SDP3x differential pressure sensor:
+   * differential pressure, Pa
+   * temperature, C
+* BME280 (optional):
+   * atmospheric pressure, Pa
+   * humidity, %
+
 
 ## Screenshots
 
