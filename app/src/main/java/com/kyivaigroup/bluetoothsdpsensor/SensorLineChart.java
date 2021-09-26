@@ -3,6 +3,7 @@ package com.kyivaigroup.bluetoothsdpsensor;
 import android.content.Context;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -19,12 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SensorLineChart extends LineChart implements OnChartGestureListener {
-    private static final int MAX_POINTS_KEEP = 10_000;
+    private static final int MAX_POINTS_KEEP = 3000;
+    private static final long UPDATE_PERIOD = 200;
     private static final String CHART_LABEL = "Differential pressure, Pa";
 
     private List<Entry> mChartEntries = new ArrayList<>();
-    private int mPressureScale = 60;
+    private int mPressureScale = 60;  // default pressure scale for SDP31
     private boolean mActive = true;
+    private long mLastUpdate = 0;
 
     public SensorLineChart(Context context) {
         super(context);
@@ -79,11 +82,13 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
             mChartEntries = mChartEntries.subList(mChartEntries.size() / 2,
                     mChartEntries.size() - 1);
         }
-        if (mActive) {
+        long tick = System.currentTimeMillis();
+        if (mActive && (tick > mLastUpdate + UPDATE_PERIOD)) {
             LineDataSet dataset = new LineDataSet(mChartEntries, CHART_LABEL);
             LineData data = new LineData(dataset);
             setData(data);
             invalidate();
+            mLastUpdate = tick;
         }
     }
 
