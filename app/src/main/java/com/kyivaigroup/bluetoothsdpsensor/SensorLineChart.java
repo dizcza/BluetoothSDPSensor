@@ -3,7 +3,6 @@ package com.kyivaigroup.bluetoothsdpsensor;
 import android.content.Context;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -28,6 +27,7 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
     private int mPressureScale = 60;  // default pressure scale for SDP31
     private boolean mActive = true;
     private long mLastUpdate = 0;
+    private long mTimeShift = 0;
 
     public SensorLineChart(Context context) {
         super(context);
@@ -74,8 +74,9 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
             }
         }
         for (RecordDP record : collection.recordsDP) {
-            Entry entry = new Entry(record.time / 1e6f, record.diffPressureRaw / (float) mPressureScale);
+            Entry entry = new Entry((record.time + mTimeShift) / 1e6f, record.diffPressureRaw / (float) mPressureScale);
             mChartEntries.add(entry);
+            mTimeShift += record.time;
         }
         if (mChartEntries.size() > MAX_POINTS_KEEP) {
             // truncate
