@@ -16,7 +16,7 @@ Based on the official [BluetoothChat](https://github.com/android/connectivity-sa
 
 ## Screenshots
 
-The plot below shows differential pressure sensor data read at the maximal ~1700 Hz frequency and sent over Bluetooth to the receiver (Android). The sensor used in the project is Sensirion SDP31 500 Pa.
+The plot below shows differential pressure sensor data read at the maximal ~2080 Hz frequency and sent over Bluetooth to the receiver (Android). The sensor used in the project is Sensirion SDP31 500 Pa.
 
 <img src="screenshots/main.png" height="400" alt="Screenshot"/>
 

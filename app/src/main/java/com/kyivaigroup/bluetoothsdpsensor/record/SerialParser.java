@@ -13,12 +13,13 @@ public class SerialParser {
     private final List<Float> mTemperatures = new ArrayList<>();
     private final List<RecordStatus> mRecordsStatus = new ArrayList<>();
     private SensorInfo mSensorInfo;
+    private long mSDCardFreeMB = 0;
 
     private final static Pattern patternDP = Pattern.compile("D(-?\\d+)t(\\d+)");
     private final static Pattern patternP = Pattern.compile("P(\\d+)H(\\d+\\.\\d)");
     private final static Pattern patternT = Pattern.compile("T(\\d+\\.\\d)");
     private final static Pattern patternStatus = Pattern.compile("S(\\d+)m(\\d+)f(\\d+)r(\\d+)");
-    private final static Pattern patternInfo = Pattern.compile("I(\\d+)r(\\d+)s(\\d+)");
+    private final static Pattern patternInfo = Pattern.compile("I(\\d+)r(\\d+)s(\\d+)m(\\d+)");
 
     public void receive(byte[] data, int size) {
         for (int i = 0; i < size; i++) {
@@ -46,6 +47,7 @@ public class SerialParser {
         RecordCollection collection = new RecordCollection(mRecordsDP, mRecordsP, mTemperatures, mRecordsStatus);
         if (mSensorInfo != null) {
             collection.sensorInfo = mSensorInfo;
+            collection.sdcardFreeMB = mSDCardFreeMB;
             mSensorInfo = null;  // obtain the info only once
         }
         mRecordsDP.clear();
@@ -115,6 +117,7 @@ public class SerialParser {
                     int modelNum = Integer.parseInt(matcher.group(1));
                     int rangePa = Integer.parseInt(matcher.group(2));
                     int pressureScale = Integer.parseInt(matcher.group(3));
+                    mSDCardFreeMB = Long.parseLong(matcher.group(4)) / (1 << 20);
                     mSensorInfo = new SensorInfo(modelNum, rangePa, pressureScale);
                     break;
                 }

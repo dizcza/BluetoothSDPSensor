@@ -28,5 +28,6 @@
     <string name="atm_pressure_desc">Atm. Pressure, Pa</string>
     <string name="temperature_desc">Temp. °C</string>
     <string name="humidity_desc">Humidity, %</string>
+    <string name="sdcard_free_mb">SD card free size: <xliff:g id="sdcard_free" example="0">%d</xliff:g>MB</string>
 
 </resources>
