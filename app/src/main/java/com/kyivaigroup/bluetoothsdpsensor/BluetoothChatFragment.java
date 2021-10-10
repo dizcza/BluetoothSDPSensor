@@ -16,10 +16,13 @@
 
 package com.kyivaigroup.bluetoothsdpsensor;
 
+import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -39,17 +42,28 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 
-import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.data.Entry;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordCollection;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordStatus;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -72,6 +86,8 @@ public class BluetoothChatFragment extends Fragment {
     private TextView mTextViewStatusReadSensor;
     private TextView mTextViewSDCardFreeMB;
     private MenuItem mConnectMenu;
+    private SavedChartsFragment mSavedChartsFragment;
+    private Button mSaveGraphBtn;
 
     /**
      * Array adapter for the conversation thread
@@ -159,6 +175,31 @@ public class BluetoothChatFragment extends Fragment {
         }
     }
 
+    private void saveChart() {
+        List<Entry> entries = mLineChart.getChartEntries();
+        if (entries.size() == 0) {
+            // no entries in the chart
+            return;
+        }
+        File root = android.os.Environment.getExternalStorageDirectory();
+        File records = new File(root.getAbsolutePath(), Constants.SDP_RECORDS_FOLDER);
+        records.mkdirs();
+        String fileName = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss'.txt'").format(new Date());
+        File file = new File(records, fileName);
+
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            PrintWriter pw = new PrintWriter(fos);
+            pw.println(mLineChart.getDescription().getText());
+            for (Entry entry : entries) {
+                pw.println(String.format("%.6f,%.4f", entry.getX(), entry.getY()));
+            }
+            pw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -168,6 +209,16 @@ public class BluetoothChatFragment extends Fragment {
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        mSavedChartsFragment = new SavedChartsFragment();
+
+        final FragmentManager fragmentManager = getParentFragmentManager();
+        fragmentManager.addOnBackStackChangedListener(() -> {
+            if (mLineChart != null) {
+                // when the count is zero, the fragment is back
+                mLineChart.setActive(fragmentManager.getBackStackEntryCount() == 0);
+            }
+        });
 
         // If the adapter is null, then Bluetooth is not supported
         FragmentActivity activity = getActivity();
@@ -238,6 +289,26 @@ public class BluetoothChatFragment extends Fragment {
         mConversationView = view.findViewById(R.id.sent_commands_list);
         mConversationView.setEmptyView(view.findViewById(R.id.empty_list_item));
 
+        mSaveGraphBtn = view.findViewById(R.id.save_btn);
+        mSaveGraphBtn.setBackgroundColor(Color.LTGRAY);
+        mSaveGraphBtn.setEnabled(false);
+        final ActivityResultLauncher<String> requestWriteExternal =
+                registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                    if (isGranted) {
+                        saveChart();
+                    } else {
+                        Toast.makeText(getActivity(), "Could not save the chart", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        mSaveGraphBtn.setOnClickListener(buttonView -> {
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                saveChart();
+            } else {
+                // The registered ActivityResultCallback gets the result of this request.
+                requestWriteExternal.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
+        } );
+
         mOutEditText = view.findViewById(R.id.command_tx);
         // Initialize the compose field with a listener for the return key
         mOutEditText.setOnEditorActionListener((v, actionId, event) -> {
@@ -259,6 +330,8 @@ public class BluetoothChatFragment extends Fragment {
 
     private void onRecordsReceived(RecordCollection collection) {
         mLineChart.update(collection);
+        mSaveGraphBtn.setBackgroundColor(getResources().getColor(R.color.ic_launcher_background));
+        mSaveGraphBtn.setEnabled(true);
         Activity activity = getActivity();
         if (activity == null) {
             return;
@@ -408,7 +481,7 @@ public class BluetoothChatFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.connect, menu);
+        inflater.inflate(R.menu.menu, menu);
         mConnectMenu = menu.findItem(R.id.connect_scan);
     }
 
@@ -423,6 +496,10 @@ public class BluetoothChatFragment extends Fragment {
                 } else {
                     disconnect();
                 }
+                return true;
+            }
+            case R.id.show_saved: {
+                getParentFragmentManager().beginTransaction().replace(R.id.main_fragment, mSavedChartsFragment).addToBackStack(null).commit();
                 return true;
             }
         }

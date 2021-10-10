@@ -20,5 +20,9 @@
         android:id="@+id/connect_scan"
         android:title="@string/connect"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/show_saved"
+        android:title="@string/show_saved"
+        app:showAsAction="never" />
 
 </menu>

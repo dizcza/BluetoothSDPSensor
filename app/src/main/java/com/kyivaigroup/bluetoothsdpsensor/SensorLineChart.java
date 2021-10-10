@@ -25,7 +25,7 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
 
     private List<Entry> mChartEntries = new ArrayList<>();
     private int mPressureScale = 60;  // default pressure scale for SDP31
-    private boolean mActive = true;
+    private boolean mIsActive = true;
     private long mLastUpdate = 0;
     private long mTimeShift = 0;
 
@@ -47,6 +47,10 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
     public void clear() {
         super.clear();
         mChartEntries.clear();
+    }
+
+    public void setActive(boolean active) {
+        mIsActive = active;
     }
 
     public void prepare(Context context) {
@@ -84,13 +88,17 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
                     mChartEntries.size() - 1);
         }
         long tick = System.currentTimeMillis();
-        if (mActive && (tick > mLastUpdate + UPDATE_PERIOD)) {
+        if (mIsActive && (tick > mLastUpdate + UPDATE_PERIOD)) {
             LineDataSet dataset = new LineDataSet(mChartEntries, CHART_LABEL);
             LineData data = new LineData(dataset);
             setData(data);
             invalidate();
             mLastUpdate = tick;
         }
+    }
+
+    public List<Entry> getChartEntries() {
+        return mChartEntries;
     }
 
     @Override
@@ -115,7 +123,7 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
 
     @Override
     public void onChartSingleTapped(MotionEvent me) {
-        mActive = !mActive;
+        mIsActive = !mIsActive;
     }
 
     @Override

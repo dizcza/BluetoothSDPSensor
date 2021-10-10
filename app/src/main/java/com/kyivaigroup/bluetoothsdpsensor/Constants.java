@@ -35,5 +35,8 @@ public interface Constants {
     // Sensor commands
     String INFO = "info";
     String RESTART = "restart";
+    String FORMAT = "format";
+
+    String SDP_RECORDS_FOLDER = "SDPSensorRecords";
 
 }
