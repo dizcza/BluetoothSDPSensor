@@ -212,14 +212,6 @@ public class BluetoothChatFragment extends Fragment {
 
         mSavedChartsFragment = new SavedChartsFragment();
 
-        final FragmentManager fragmentManager = getParentFragmentManager();
-        fragmentManager.addOnBackStackChangedListener(() -> {
-            if (mLineChart != null) {
-                // when the count is zero, the fragment is back
-                mLineChart.setActive(fragmentManager.getBackStackEntryCount() == 0);
-            }
-        });
-
         // If the adapter is null, then Bluetooth is not supported
         FragmentActivity activity = getActivity();
         if (mBluetoothAdapter == null && activity != null) {
@@ -369,6 +361,19 @@ public class BluetoothChatFragment extends Fragment {
 
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BluetoothChatService(mHandler);
+
+        final FragmentManager fragmentManager = getParentFragmentManager();
+        fragmentManager.addOnBackStackChangedListener(() -> {
+            if (mLineChart != null) {
+                // when the count is zero, the fragment is back
+                if (fragmentManager.getBackStackEntryCount() == 0) {
+                    mLineChart.clear();
+                    mChatService.onResume();
+                } else {
+                    mChatService.onPause();
+                }
+            }
+        });
     }
 
     /**
