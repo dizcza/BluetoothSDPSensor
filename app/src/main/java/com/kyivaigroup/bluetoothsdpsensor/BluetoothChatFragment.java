@@ -20,6 +20,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -322,7 +323,10 @@ public class BluetoothChatFragment extends Fragment {
 
     private void onRecordsReceived(RecordCollection collection) {
         mLineChart.update(collection);
-        mSaveGraphBtn.setBackgroundColor(getResources().getColor(R.color.ic_launcher_background));
+        Context context = getContext();
+        if (context != null) {
+            mSaveGraphBtn.setBackgroundColor(context.getResources().getColor(R.color.ic_launcher_background));
+        }
         mSaveGraphBtn.setEnabled(true);
         Activity activity = getActivity();
         if (activity == null) {
