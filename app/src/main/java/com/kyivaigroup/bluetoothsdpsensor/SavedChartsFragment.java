@@ -83,13 +83,17 @@ class LineDataLabeled extends LineData {
 
 public class SavedChartsFragment extends Fragment {
 
+    private ChartDataAdapter mAdapter;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         final ActivityResultLauncher<String> requestReadExternal =
                 registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                    if (!isGranted) {
+                    if (isGranted) {
+                        mAdapter.addAll(loadCharts());
+                    } else {
                         getParentFragmentManager().popBackStack();
                     }
                 });
@@ -108,10 +112,11 @@ public class SavedChartsFragment extends Fragment {
         List<LineDataLabeled> charts = new ArrayList<>();
         File root = Environment.getExternalStorageDirectory();
         final File folder = new File(root.getAbsolutePath(), Constants.SDP_RECORDS_FOLDER);
-        if (!folder.exists()) {
+        File[] files = folder.listFiles();
+        if (!folder.exists() || files == null) {
             return charts;
         }
-        for (File file : folder.listFiles()) {
+        for (File file : files) {
             List<Entry> chartEntries = new ArrayList<>();
             String descriptionText = "";
             try (BufferedReader br = new BufferedReader(new FileReader(file))) {
@@ -136,8 +141,8 @@ public class SavedChartsFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         ListView listView = view.findViewById(R.id.charts_list);
         List<LineDataLabeled> charts = loadCharts();
-        ChartDataAdapter adapter = new ChartDataAdapter(getContext(), charts);
-        listView.setAdapter(adapter);
+        mAdapter = new ChartDataAdapter(getContext(), charts);
+        listView.setAdapter(mAdapter);
     }
 
 }
