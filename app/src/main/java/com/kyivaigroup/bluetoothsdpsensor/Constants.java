@@ -36,6 +36,7 @@ public interface Constants {
     String INFO = "info";
     String RESTART = "restart";
     String FORMAT = "format";
+    String SYNC_CLOCK = "sync";
 
     String SDP_RECORDS_FOLDER = "SDPSensorRecords";
 

@@ -62,10 +62,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * This fragment controls Bluetooth to communicate with other devices.
@@ -78,7 +81,6 @@ public class BluetoothChatFragment extends Fragment {
 
     // Layout Views
     private ListView mConversationView;
-    private EditText mOutEditText;
     private SensorLineChart mLineChart;
     private TextView mTextViewTemperature;
     private TextView mTextViewHumidity;
@@ -131,7 +133,13 @@ public class BluetoothChatFragment extends Fragment {
                             if (null != activity) {
                                 setStatus(activity.getString(R.string.title_connected_to, mConnectedDeviceName));
                             }
-                            BluetoothChatFragment.this.sendMessage(Constants.INFO);
+                            String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss.SSS")
+                                    .format(new Date());
+                            long tick = System.currentTimeMillis();
+                            String syncMessage = String.format(Locale.getDefault(),
+                                    "/%s\n/%s %d\n%s\0", Constants.INFO, Constants.SYNC_CLOCK, tick, timestamp);
+                            BluetoothChatFragment.this.sendMessage(syncMessage);
+
                             mConnectMenu.setTitle(R.string.disconnect);
                             mConversationArrayAdapter.clear();
                             mLineChart.clear();
@@ -151,7 +159,7 @@ public class BluetoothChatFragment extends Fragment {
                 case Constants.MESSAGE_WRITE:
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
-                    String writeMessage = new String(writeBuf).replace("\n", "");
+                    String writeMessage = new String(writeBuf);
                     mConversationArrayAdapter.add(writeMessage);
                     break;
                 case Constants.MESSAGE_READ:
@@ -302,22 +310,14 @@ public class BluetoothChatFragment extends Fragment {
             }
         } );
 
-        mOutEditText = view.findViewById(R.id.command_tx);
-        // Initialize the compose field with a listener for the return key
-        mOutEditText.setOnEditorActionListener((v, actionId, event) -> {
-            // If the action is a key-up event on the return key, send the message
-            if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
-                String message = v.getText().toString();
-                sendMessage(message);
-            }
-            return true;
-        });
-
+        final EditText sendEditText = view.findViewById(R.id.command_tx);
         Button sendButton = view.findViewById(R.id.button_send);
         sendButton.setOnClickListener(buttonView -> {
             // Send a message using content of the edit text widget
-            String message = mOutEditText.getText().toString();
+            String message = sendEditText.getText().toString();
+            message = String.format(Locale.getDefault(), "/%s\0", message);
             sendMessage(message);
+            sendEditText.setText("");
         } );
     }
 
@@ -394,13 +394,9 @@ public class BluetoothChatFragment extends Fragment {
 
         // Check that there's actually something to send
         if (message.length() > 0) {
-            message = String.format(Locale.getDefault(), "/%s\n", message);
             // Get the message bytes and tell the BluetoothChatService to write
             byte[] send = message.getBytes();
-            mChatService.write(send);
-
-            // Cnd clear the edit text field
-            mOutEditText.setText("");
+            mChatService.write(send, true);
         }
     }
 

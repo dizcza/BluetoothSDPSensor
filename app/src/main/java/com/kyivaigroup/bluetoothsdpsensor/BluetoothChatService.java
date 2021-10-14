@@ -29,6 +29,9 @@ import com.kyivaigroup.bluetoothsdpsensor.record.SerialParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 /**
@@ -44,10 +47,13 @@ public class BluetoothChatService {
     // UUID of the BT classic Serial Port Protocol (SPP)
     private static final UUID UUID_SPP = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
+    private static final long SYNC_CLOCK_PERIOD_MS = 10_000;
+
     // Member fields
     private final Handler mHandler;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
+    private Timer mSyncTimer;
     private int mState;
     private int mNewState;
 
@@ -163,6 +169,20 @@ public class BluetoothChatService {
         mHandler.sendMessage(msg);
         // Update UI title
         updateUserInterfaceTitle();
+
+        if (mSyncTimer != null) {
+            mSyncTimer.cancel();
+        }
+        mSyncTimer = new Timer();
+        mSyncTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                long tick = System.currentTimeMillis();
+                String syncMessage = String.format(Locale.getDefault(), "/%s %d\0", Constants.SYNC_CLOCK, tick);
+                byte[] send = syncMessage.getBytes();
+                write(send, false);
+            }
+        }, 1000, SYNC_CLOCK_PERIOD_MS);
     }
 
     /**
@@ -179,27 +199,27 @@ public class BluetoothChatService {
             mConnectedThread = null;
         }
 
+        if (mSyncTimer != null) {
+            mSyncTimer.cancel();
+            mSyncTimer = null;
+        }
+
         mState = STATE_NONE;
         // Update UI title
         updateUserInterfaceTitle();
     }
 
     /**
-     * Write to the ConnectedThread in an unsynchronized manner
+     * Write to the ConnectedThread in an synchronized manner
      *
      * @param out The bytes to write
-     * @see ConnectedThread#write(byte[])
+     * @see ConnectedThread#write(byte[], boolean)
      */
-    public void write(byte[] out) {
-        // Create temporary object
-        ConnectedThread r;
-        // Synchronize a copy of the ConnectedThread
-        synchronized (this) {
-            if (mState != STATE_CONNECTED) return;
-            r = mConnectedThread;
+    public synchronized void write(byte[] out, boolean notifyUI) {
+        if (mState != STATE_CONNECTED) {
+            return;
         }
-        // Perform the write unsynchronized
-        r.write(out);
+        mConnectedThread.write(out, notifyUI);
     }
 
     private void connectionError(String msg) {
@@ -377,13 +397,16 @@ public class BluetoothChatService {
          * Write to the connected OutStream.
          *
          * @param buffer The bytes to write
+         * @param notifyUI Send the message back to the UI to be displayed in the sent messages
          */
-        public void write(byte[] buffer) {
+        public void write(byte[] buffer, boolean notifyUI) {
             try {
                 mmOutStream.write(buffer);
 
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(Constants.MESSAGE_WRITE, buffer).sendToTarget();
+                if (notifyUI) {
+                    mHandler.obtainMessage(Constants.MESSAGE_WRITE, buffer).sendToTarget();
+                }
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }
