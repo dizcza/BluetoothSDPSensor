@@ -20,6 +20,7 @@ public class SerialParser {
     private final static Pattern patternT = Pattern.compile("T(\\d+\\.\\d)");
     private final static Pattern patternStatus = Pattern.compile("S(\\d+)m(\\d+)f(\\d+)r(\\d+)");
     private final static Pattern patternInfo = Pattern.compile("I(\\d+)r(\\d+)s(\\d+)m(\\d+)");
+    private final static Pattern patternClock = Pattern.compile("C(\\d+)");
 
     public void receive(byte[] data, int size) {
         for (int i = 0; i < size; i++) {
@@ -107,6 +108,18 @@ public class SerialParser {
                             Integer.parseInt(matcher.group(3)),
                             Long.parseLong(matcher.group(4))
                     ));
+                }
+                break;
+            }
+            case 'C': {
+                // Clock: C<clock_time:long>
+                Matcher mather = patternClock.matcher(mCommand);
+                if (mather.matches()) {
+                    long clock = Long.parseLong(mather.group(1));
+                    if (mRecordsDP.size() > 0) {
+                        RecordDP currRecord = mRecordsDP.get(mRecordsDP.size() - 1);
+                        currRecord.setClockTick(clock);
+                    }
                 }
                 break;
             }

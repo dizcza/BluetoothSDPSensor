@@ -28,14 +28,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -62,13 +60,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * This fragment controls Bluetooth to communicate with other devices.
@@ -137,7 +132,7 @@ public class BluetoothChatFragment extends Fragment {
                                     .format(new Date());
                             long tick = System.currentTimeMillis();
                             String syncMessage = String.format(Locale.getDefault(),
-                                    "/%s\n/%s %d\n%s\0", Constants.INFO, Constants.SYNC_CLOCK, tick, timestamp);
+                                    "/%s\n/%s %d\n%s\0", Constants.INFO, Constants.CLOCK_SYNC, tick, timestamp);
                             BluetoothChatFragment.this.sendMessage(syncMessage);
 
                             mConnectMenu.setTitle(R.string.disconnect);
@@ -180,6 +175,32 @@ public class BluetoothChatFragment extends Fragment {
                                 Toast.LENGTH_SHORT).show();
                     }
                     break;
+            }
+        }
+    }
+
+    private class BackStackChanged implements FragmentManager.OnBackStackChangedListener {
+
+        private boolean mChartWasActive;
+
+        @Override
+        public void onBackStackChanged() {
+            if (mLineChart == null || mChatService == null) {
+                return;
+            }
+            if (getParentFragmentManager().getBackStackEntryCount() == 0) {
+                // Main fragment is back active
+                if (mChartWasActive) {
+                    // if the chart was active, clear and resume
+                    // otherwise, keep paused until the user press the button
+                    mLineChart.clear();
+                }
+                mChatService.onResume();
+            } else {
+                // Main fragment is replaced by the SavedChartsFragment
+                mChartWasActive = mLineChart.isActive();
+                mLineChart.pause();
+                mChatService.onPause();
             }
         }
     }
@@ -227,6 +248,8 @@ public class BluetoothChatFragment extends Fragment {
             Toast.makeText(activity, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             activity.finish();
         }
+
+        getParentFragmentManager().addOnBackStackChangedListener(new BackStackChanged());
     }
 
     @Override
@@ -365,19 +388,6 @@ public class BluetoothChatFragment extends Fragment {
 
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BluetoothChatService(mHandler);
-
-        final FragmentManager fragmentManager = getParentFragmentManager();
-        fragmentManager.addOnBackStackChangedListener(() -> {
-            if (mLineChart != null) {
-                // when the count is zero, the fragment is back
-                if (fragmentManager.getBackStackEntryCount() == 0) {
-                    mLineChart.clear();
-                    mChatService.onResume();
-                } else {
-                    mChatService.onPause();
-                }
-            }
-        });
     }
 
     /**

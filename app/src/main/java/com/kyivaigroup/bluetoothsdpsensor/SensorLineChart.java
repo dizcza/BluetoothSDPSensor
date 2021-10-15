@@ -19,15 +19,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SensorLineChart extends LineChart implements OnChartGestureListener {
-    private static final int MAX_POINTS_KEEP = 3000;
-    private static final long UPDATE_PERIOD = 200;
+    private static final long UPDATE_PERIOD_MS = 2000;
     private static final String CHART_LABEL = "Differential pressure, Pa";
 
     private List<Entry> mChartEntries = new ArrayList<>();
     private int mPressureScale = 60;  // default pressure scale for SDP31
-    private boolean mIsActive = true;
+    private State mState = State.CLEARED;
     private long mLastUpdate = 0;
     private long mTimeShift = 0;
+
+    public enum State {
+        CLEARED,   // waiting for sensory data
+        ACTIVE,    // actively displaying data
+        INACTIVE   // paused
+    }
 
     public SensorLineChart(Context context) {
         super(context);
@@ -44,13 +49,16 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
         prepare(context);
     }
 
-    public void clear() {
+    public synchronized void clear() {
         super.clear();
         mChartEntries.clear();
+        mLastUpdate = System.currentTimeMillis();
+        mState = State.CLEARED;
     }
 
-    public void setActive(boolean active) {
-        mIsActive = active;
+    public synchronized boolean isActive() {
+        // either CLEARED or ACTIVE
+        return mState != State.INACTIVE;
     }
 
     public void prepare(Context context) {
@@ -62,43 +70,73 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
         setOnChartGestureListener(this);
     }
 
-    public void update(RecordCollection collection) {
+    /**
+     * Adjust estimated time shift with the device clock.
+     * @param clockTick absolute time since device boot in us
+     */
+    private void syncClock(long clockTick) {
+        if (clockTick == mTimeShift) {
+            // the clocks are synchronized
+            return;
+        }
+        final float delay = (clockTick - mTimeShift) / 1e6f;  // in seconds
+        if (mState != State.INACTIVE) {
+            // apply delay adjustment if not paused
+            for (Entry entry : mChartEntries) {
+                entry.setX(entry.getX() + delay);
+            }
+        }
+        mTimeShift = clockTick;
+    }
+
+    private void rescaleY(int prScale) {
+        if (prScale == mPressureScale) {
+            return;
+        }
+        // apply new scaling factor even if paused
+        final float rescale = ((float) mPressureScale) / prScale;
+        for (Entry entry : mChartEntries) {
+            entry.setY(entry.getY() * rescale);
+        }
+        mPressureScale = prScale;
+    }
+
+    public synchronized void update(RecordCollection collection) {
         if (collection.sensorInfo != null) {
             Description description = new Description();
             description.setText(collection.sensorInfo.toString());
             setDescription(description);
-            int prScale = collection.sensorInfo.pressureScale;
-            if (prScale != mPressureScale) {
-                // apply new scaling factor
-                final float rescale = ((float) mPressureScale) / prScale;
-                for (Entry entry : mChartEntries) {
-                    entry.setY(entry.getY() * rescale);
-                }
-                mPressureScale = prScale;
-            }
+            rescaleY(collection.sensorInfo.pressureScale);
         }
         for (RecordDP record : collection.recordsDP) {
-            Entry entry = new Entry((record.time + mTimeShift) / 1e6f, record.diffPressureRaw / (float) mPressureScale);
-            mChartEntries.add(entry);
+            if (mState != State.INACTIVE) {
+                Entry entry = new Entry((record.time + mTimeShift) / 1e6f, record.diffPressureRaw / (float) mPressureScale);
+                mChartEntries.add(entry);
+            }
             mTimeShift += record.time;
-        }
-        if (mChartEntries.size() > MAX_POINTS_KEEP) {
-            // truncate
-            mChartEntries = mChartEntries.subList(mChartEntries.size() / 2,
-                    mChartEntries.size() - 1);
+            if (record.clockTick != 0) {
+                syncClock(record.clockTick);
+            }
         }
         long tick = System.currentTimeMillis();
-        if (mIsActive && (tick > mLastUpdate + UPDATE_PERIOD)) {
-            LineDataSet dataset = new LineDataSet(mChartEntries, CHART_LABEL);
+        if ((mState != State.INACTIVE) && (tick > mLastUpdate + UPDATE_PERIOD_MS)) {
+            // either CLEARED or ACTIVE state
+            LineDataSet dataset = new LineDataSet(new ArrayList<>(mChartEntries), CHART_LABEL);
             LineData data = new LineData(dataset);
             setData(data);
             invalidate();
             mLastUpdate = tick;
+            mChartEntries.clear();
+            mState = State.ACTIVE;
         }
     }
 
-    public List<Entry> getChartEntries() {
+    public synchronized List<Entry> getChartEntries() {
         return mChartEntries;
+    }
+
+    public synchronized void pause() {
+        mState = State.INACTIVE;
     }
 
     @Override
@@ -123,7 +161,19 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
 
     @Override
     public void onChartSingleTapped(MotionEvent me) {
-        mIsActive = !mIsActive;
+        synchronized (this) {
+            switch (mState) {
+                case CLEARED:
+                    // ignore touches
+                    break;
+                case INACTIVE:
+                    clear();
+                    break;
+                case ACTIVE:
+                    pause();
+                    break;
+            }
+        }
     }
 
     @Override

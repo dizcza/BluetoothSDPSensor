@@ -42,7 +42,7 @@ import java.util.UUID;
  */
 public class BluetoothChatService {
     // Debugging
-    private static final String TAG = "BT Service";
+    private static final String TAG = BluetoothChatService.class.getSimpleName();
 
     // UUID of the BT classic Serial Port Protocol (SPP)
     private static final UUID UUID_SPP = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -178,7 +178,7 @@ public class BluetoothChatService {
             @Override
             public void run() {
                 long tick = System.currentTimeMillis();
-                String syncMessage = String.format(Locale.getDefault(), "/%s %d\0", Constants.SYNC_CLOCK, tick);
+                String syncMessage = String.format(Locale.getDefault(), "/%s %d\0", Constants.CLOCK_SYNC, tick);
                 byte[] send = syncMessage.getBytes();
                 write(send, false);
             }
@@ -341,12 +341,17 @@ public class BluetoothChatService {
         public void run() {
             byte[] buffer = new byte[16284];
             int nbytes;
+            int nbytesMax = 1000;  // omit printing small values
 
             // Keep listening to the InputStream while connected
             while (mState == STATE_CONNECTED) {
                 try {
                     // Read from the InputStream
                     nbytes = mmInStream.read(buffer);
+                    if (nbytes > nbytesMax) {
+                        nbytesMax = nbytes;
+                        Log.i(TAG, String.format("RX %d bytes", nbytes));
+                    }
 
                     mmSerialParser.receive(buffer, nbytes);
                     if (mmSerialParser.hasRecords()) {
@@ -355,7 +360,7 @@ public class BluetoothChatService {
                         mHandler.obtainMessage(Constants.MESSAGE_READ, collection).sendToTarget();
                     }
 
-                    sleep(50);
+                    sleep(100);
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionError("Device connection was lost");

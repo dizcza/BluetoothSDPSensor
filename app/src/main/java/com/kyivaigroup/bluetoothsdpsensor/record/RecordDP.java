@@ -29,11 +29,17 @@ class TimeDeltaFormatter {
 public class RecordDP {
 
     public final short diffPressureRaw;
-    public final long time;
+    public final long time;  // time to prev sample
+    public long clockTick;  // absolute time since boot in us
 
     public RecordDP(short diffPressureRaw, long time) {
         this.diffPressureRaw = diffPressureRaw;
         this.time = time;
+        this.clockTick = 0;
+    }
+
+    public void setClockTick(long clock) {
+        this.clockTick = clock;
     }
 
     @NonNull
