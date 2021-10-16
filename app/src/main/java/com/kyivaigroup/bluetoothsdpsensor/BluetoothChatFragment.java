@@ -85,7 +85,6 @@ public class BluetoothChatFragment extends Fragment {
     private TextView mTextViewPressure;
     private TextView mTextViewStatusQueueSize;
     private TextView mTextViewStatusReadSensor;
-    private TextView mTextViewSDCardFreeMB;
     private MenuItem mConnectMenu;
     private SavedChartsFragment mSavedChartsFragment;
     private Button mSaveGraphBtn;
@@ -342,7 +341,6 @@ public class BluetoothChatFragment extends Fragment {
         mTextViewTemperature = view.findViewById(R.id.text_temperature);
         mTextViewStatusQueueSize = view.findViewById(R.id.text_status_queue_size);
         mTextViewStatusReadSensor = view.findViewById(R.id.text_status_read_sensor);
-        mTextViewSDCardFreeMB = view.findViewById(R.id.text_sdcard_free_mb);
 
         mConversationView = view.findViewById(R.id.sent_commands_list);
         mConversationView.setEmptyView(view.findViewById(R.id.empty_list_item));
@@ -403,7 +401,7 @@ public class BluetoothChatFragment extends Fragment {
             mTextViewStatusReadSensor.setText(activity.getString(R.string.status_read_sensor, status.readDurationMax));
         }
         if (collection.sdcardFreeMB != 0) {
-            mTextViewSDCardFreeMB.setText(activity.getString(R.string.sdcard_free_mb, collection.sdcardFreeMB));
+            mConversationArrayAdapter.add(activity.getString(R.string.sdcard_free_mb, collection.sdcardFreeMB));
         }
         if (collection.logs.length > 0) {
             mConversationArrayAdapter.addAll(collection.logs);
