@@ -24,7 +24,7 @@
     <string name="command_tx_hint">Enter the command to send</string>
     <string name="empty_sent_commands">Sent commands</string>
     <string name="status_queue_size">Queue size: current <xliff:g id="queue_curr" example="0">%03d</xliff:g>, max <xliff:g id="queue_max" example="0">%d</xliff:g></string>
-    <string name="status_read_sensor">SDP max sampling period <xliff:g id="read_duration_max" example="0">%d</xliff:g> us, failed <xliff:g id="read_failed" example="0">%d</xliff:g></string>
+    <string name="status_read_sensor">SDP max sampling period <xliff:g id="read_duration_max" example="0">%d</xliff:g> us</string>
     <string name="atm_pressure_desc">Atm. Pressure, Pa</string>
     <string name="temperature_desc">Temp. °C</string>
     <string name="humidity_desc">Humidity, %</string>

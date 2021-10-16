@@ -22,7 +22,7 @@ public class SerialParser {
     private final static Pattern patternDP = Pattern.compile("D(-?\\d+)t(\\d+)");
     private final static Pattern patternP = Pattern.compile("P(\\d+)H(\\d+\\.\\d)");
     private final static Pattern patternT = Pattern.compile("T(\\d+\\.\\d)");
-    private final static Pattern patternStatus = Pattern.compile("S(\\d+)m(\\d+)f(\\d+)r(\\d+)");
+    private final static Pattern patternStatus = Pattern.compile("S(\\d+)m(\\d+)r(\\d+)");
     private final static Pattern patternInfo = Pattern.compile("I(\\d+)r(\\d+)s(\\d+)m(\\d+)");
     private final static Pattern patternClock = Pattern.compile("C(\\d+)");
 
@@ -102,7 +102,6 @@ public class SerialParser {
                  * Status:
                  *   - S<int> current queue size
                  *   - m<int> max queue size
-                 *   - f<int> no. of failed sensor reads
                  *   - r<long> max read duration
                  */
                 Matcher matcher = patternStatus.matcher(mCommand);
@@ -110,8 +109,7 @@ public class SerialParser {
                     mRecordsStatus.add(new RecordStatus(
                             Integer.parseInt(matcher.group(1)),
                             Integer.parseInt(matcher.group(2)),
-                            Integer.parseInt(matcher.group(3)),
-                            Long.parseLong(matcher.group(4))
+                            Long.parseLong(matcher.group(3))
                     ));
                 }
                 break;

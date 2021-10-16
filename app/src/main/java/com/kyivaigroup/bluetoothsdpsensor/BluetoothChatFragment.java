@@ -402,7 +402,7 @@ public class BluetoothChatFragment extends Fragment {
         if (collection.status != null) {
             RecordStatus status = collection.status;
             mTextViewStatusQueueSize.setText(activity.getString(R.string.status_queue_size, status.messagesCurr, status.messagesMax));
-            mTextViewStatusReadSensor.setText(activity.getString(R.string.status_read_sensor, status.readDurationMax, status.readsFailed));
+            mTextViewStatusReadSensor.setText(activity.getString(R.string.status_read_sensor, status.readDurationMax));
         }
         if (collection.sdcardFreeMB != 0) {
             mTextViewSDCardFreeMB.setText(activity.getString(R.string.sdcard_free_mb, collection.sdcardFreeMB));
