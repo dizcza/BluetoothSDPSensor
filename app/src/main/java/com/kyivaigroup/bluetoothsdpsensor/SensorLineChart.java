@@ -22,7 +22,7 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
     private static final long UPDATE_PERIOD_MS = 2000;
     private static final String CHART_LABEL = "Differential pressure, Pa";
 
-    private List<Entry> mChartEntries = new ArrayList<>();
+    private final List<Entry> mChartEntries = new ArrayList<>();
     private int mPressureScale = 60;  // default pressure scale for SDP31
     private State mState = State.CLEARED;
     private long mLastUpdate = 0;

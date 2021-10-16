@@ -2,7 +2,10 @@ package com.kyivaigroup.bluetoothsdpsensor.record;
 
 import android.util.Log;
 
+import com.kyivaigroup.bluetoothsdpsensor.Constants;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +28,7 @@ public class SerialParser {
     private final static Pattern patternStatus = Pattern.compile("S(\\d+)m(\\d+)r(\\d+)");
     private final static Pattern patternInfo = Pattern.compile("I(\\d+)r(\\d+)s(\\d+)m(\\d+)");
     private final static Pattern patternClock = Pattern.compile("C(\\d+)");
+    private final static Pattern patternLog = Pattern.compile("\\u001B\\[0m");
 
     public void receive(byte[] data, int size) {
         for (int i = 0; i < size; i++) {
@@ -49,7 +53,15 @@ public class SerialParser {
     }
 
     public RecordCollection consumeRecords() {
-        RecordCollection collection = new RecordCollection(mRecordsDP, mRecordsP, mTemperatures, mRecordsStatus, mLog.toString());
+        String logStr = mLog.toString().replaceAll("\\u001B\\[0;3\\dm", "");
+        String[] logs = patternLog.split(logStr);
+        mLog.setLength(0);
+        if (!logStr.endsWith(Constants.ANSI_RESET)) {
+            mLog.append(logs[logs.length - 1]);
+            logs = Arrays.copyOf(logs, logs.length - 1);
+        }
+        RecordCollection collection = new RecordCollection(mRecordsDP, mRecordsP, mTemperatures,
+                mRecordsStatus, logs);
         if (mSensorInfo != null) {
             collection.sensorInfo = mSensorInfo;
             collection.sdcardFreeMB = mSDCardFreeMB;
@@ -59,7 +71,6 @@ public class SerialParser {
         mRecordsP.clear();
         mTemperatures.clear();
         mRecordsStatus.clear();
-        mLog.setLength(0);
         return collection;
     }
 

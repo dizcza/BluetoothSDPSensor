@@ -40,4 +40,5 @@ public interface Constants {
 
     String SDP_RECORDS_FOLDER = "SDPSensorRecords";
 
+    String ANSI_RESET = "\u001B[0m";
 }

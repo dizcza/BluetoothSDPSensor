@@ -227,9 +227,7 @@ public class BluetoothChatFragment extends Fragment {
             if (mDefaultColor == null) {
                 mDefaultColor = textView.getCurrentTextColor();
             }
-            String text = textView.getText().toString();
-            text = text.replaceAll("(\\u001B\\[0;3\\dm|\\u001B\\[0m)", "");
-            textView.setText(text);
+            CharSequence text = textView.getText();
             if (mLogPattern.matcher(text).find()) {
                 Integer color = mColorMap.get(text.charAt(0));
                 textView.setTextColor(color);
@@ -407,8 +405,8 @@ public class BluetoothChatFragment extends Fragment {
         if (collection.sdcardFreeMB != 0) {
             mTextViewSDCardFreeMB.setText(activity.getString(R.string.sdcard_free_mb, collection.sdcardFreeMB));
         }
-        if (collection.log.length() > 0) {
-            mConversationArrayAdapter.add(collection.log);
+        if (collection.logs.length > 0) {
+            mConversationArrayAdapter.addAll(collection.logs);
         }
     }
 
