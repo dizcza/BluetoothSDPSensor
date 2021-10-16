@@ -13,7 +13,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordCollection;
-import com.kyivaigroup.bluetoothsdpsensor.record.RecordDP;
+import com.kyivaigroup.bluetoothsdpsensor.record.RecordSDP;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,7 +108,7 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
             setDescription(description);
             rescaleY(collection.sensorInfo.pressureScale);
         }
-        for (RecordDP record : collection.recordsDP) {
+        for (RecordSDP record : collection.recordsSDP) {
             if (mState != State.INACTIVE) {
                 Entry entry = new Entry((record.time + mTimeShift) / 1e6f, record.diffPressureRaw / (float) mPressureScale);
                 mChartEntries.add(entry);

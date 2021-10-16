@@ -1,7 +1,5 @@
 package com.kyivaigroup.bluetoothsdpsensor.record;
 
-import android.util.Log;
-
 import com.kyivaigroup.bluetoothsdpsensor.Constants;
 
 import java.util.ArrayList;
@@ -15,16 +13,14 @@ public class SerialParser {
     private final StringBuilder mCommand = new StringBuilder();
     private final StringBuilder mLog = new StringBuilder();
 
-    private final List<RecordDP> mRecordsDP = new ArrayList<>();
-    private final List<RecordP> mRecordsP = new ArrayList<>();
-    private final List<Float> mTemperatures = new ArrayList<>();
+    private final List<RecordSDP> mRecordsSDP = new ArrayList<>();
+    private final List<RecordBMP> mRecordsBMP = new ArrayList<>();
     private final List<RecordStatus> mRecordsStatus = new ArrayList<>();
     private SensorInfo mSensorInfo;
     private long mSDCardFreeMB = 0;
 
-    private final static Pattern patternDP = Pattern.compile("D(-?\\d+)t(\\d+)");
-    private final static Pattern patternP = Pattern.compile("P(\\d+)H(\\d+\\.\\d)");
-    private final static Pattern patternT = Pattern.compile("T(\\d+\\.\\d)");
+    private final static Pattern patternSDP = Pattern.compile("D(-?\\d+)t(\\d+)");
+    private final static Pattern patternBMP = Pattern.compile("P(\\d+)T(\\d+\\.\\d)H(\\d+\\.\\d)");
     private final static Pattern patternStatus = Pattern.compile("S(\\d+)m(\\d+)r(\\d+)");
     private final static Pattern patternInfo = Pattern.compile("I(\\d+)r(\\d+)s(\\d+)m(\\d+)");
     private final static Pattern patternClock = Pattern.compile("C(\\d+)");
@@ -49,7 +45,7 @@ public class SerialParser {
     }
 
     public boolean hasRecords() {
-        return mRecordsDP.size() > 0;
+        return mRecordsSDP.size() > 0;
     }
 
     public RecordCollection consumeRecords() {
@@ -60,16 +56,14 @@ public class SerialParser {
             mLog.append(logs[logs.length - 1]);
             logs = Arrays.copyOf(logs, logs.length - 1);
         }
-        RecordCollection collection = new RecordCollection(mRecordsDP, mRecordsP, mTemperatures,
-                mRecordsStatus, logs);
+        RecordCollection collection = new RecordCollection(mRecordsSDP, mRecordsBMP, mRecordsStatus, logs);
         if (mSensorInfo != null) {
             collection.sensorInfo = mSensorInfo;
             collection.sdcardFreeMB = mSDCardFreeMB;
             mSensorInfo = null;  // obtain the info only once
         }
-        mRecordsDP.clear();
-        mRecordsP.clear();
-        mTemperatures.clear();
+        mRecordsSDP.clear();
+        mRecordsBMP.clear();
         mRecordsStatus.clear();
         return collection;
     }
@@ -81,30 +75,22 @@ public class SerialParser {
         switch (mCommand.charAt(0)) {
             case 'D': {
                 // Diff pressure, time: D<int16>t<int64>
-                Matcher matcher = patternDP.matcher(mCommand);
+                Matcher matcher = patternSDP.matcher(mCommand);
                 if (matcher.matches()) {
                     short dp = Short.parseShort(matcher.group(1));
                     long time = Long.parseLong(matcher.group(2));
-                    mRecordsDP.add(new RecordDP(dp, time));
-                }
-                break;
-            }
-            case 'T': {
-                // Temperature: T<float>
-                Matcher matcher = patternT.matcher(mCommand);
-                if (matcher.matches()) {
-                    float temperature = Float.parseFloat(matcher.group(1));
-                    mTemperatures.add(temperature);
+                    mRecordsSDP.add(new RecordSDP(dp, time));
                 }
                 break;
             }
             case 'P': {
-                // Atm. pressure, humidity: P<float>H<float>
-                Matcher matcher = patternP.matcher(mCommand);
+                // Atm. pressure, temperature, humidity: P<float>T<float>H<float>
+                Matcher matcher = patternBMP.matcher(mCommand);
                 if (matcher.matches()) {
                     float pressure = Float.parseFloat(matcher.group(1));
-                    float humidity = Float.parseFloat(matcher.group(2));
-                    mRecordsP.add(new RecordP(pressure, humidity));
+                    float temperature = Float.parseFloat(matcher.group(2));
+                    float humidity = Float.parseFloat(matcher.group(3));
+                    mRecordsBMP.add(new RecordBMP(pressure, temperature, humidity));
                 }
                 break;
             }
@@ -130,8 +116,8 @@ public class SerialParser {
                 Matcher mather = patternClock.matcher(mCommand);
                 if (mather.matches()) {
                     long clock = Long.parseLong(mather.group(1));
-                    if (mRecordsDP.size() > 0) {
-                        RecordDP currRecord = mRecordsDP.get(mRecordsDP.size() - 1);
+                    if (mRecordsSDP.size() > 0) {
+                        RecordSDP currRecord = mRecordsSDP.get(mRecordsSDP.size() - 1);
                         currRecord.setClockTick(clock);
                     }
                 }

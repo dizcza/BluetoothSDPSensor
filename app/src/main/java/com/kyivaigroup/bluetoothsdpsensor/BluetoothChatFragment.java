@@ -53,6 +53,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
 import com.github.mikephil.charting.data.Entry;
+import com.kyivaigroup.bluetoothsdpsensor.record.RecordBMP;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordCollection;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordStatus;
 
@@ -388,12 +389,11 @@ public class BluetoothChatFragment extends Fragment {
             return;
         }
 
-        if (collection.temperature != null) {
-            mTextViewTemperature.setText(String.format(Locale.getDefault(), "%.1f", collection.temperature));
-        }
-        if (collection.pressureHumidity != null) {
-            mTextViewPressure.setText(String.format(Locale.getDefault(), "%.0f", collection.pressureHumidity.pressure));
-            mTextViewHumidity.setText(String.format(Locale.getDefault(), "%.1f", collection.pressureHumidity.humidity));
+        RecordBMP recordBMP = collection.recordBMP;
+        if (recordBMP != null) {
+            mTextViewPressure.setText(String.format(Locale.getDefault(), "%.0f", recordBMP.pressure));
+            mTextViewTemperature.setText(String.format(Locale.getDefault(), "%.1f", recordBMP.temperature));
+            mTextViewHumidity.setText(String.format(Locale.getDefault(), "%.1f", recordBMP.humidity));
         }
         if (collection.status != null) {
             RecordStatus status = collection.status;

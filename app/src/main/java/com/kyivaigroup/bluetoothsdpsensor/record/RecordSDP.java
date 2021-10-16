@@ -26,13 +26,13 @@ class TimeDeltaFormatter {
 }
 
 
-public class RecordDP {
+public class RecordSDP {
 
     public final short diffPressureRaw;
     public final long time;  // time to prev sample
     public long clockTick;  // absolute time since boot in us
 
-    public RecordDP(short diffPressureRaw, long time) {
+    public RecordSDP(short diffPressureRaw, long time) {
         this.diffPressureRaw = diffPressureRaw;
         this.time = time;
         this.clockTick = 0;

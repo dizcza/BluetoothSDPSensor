@@ -4,12 +4,14 @@ import androidx.annotation.NonNull;
 
 import java.util.Locale;
 
-public class RecordP {
+public class RecordBMP {
     public final float pressure;
+    public final float temperature;
     public final float humidity;
 
-    public RecordP(float pressure, float humidity) {
+    public RecordBMP(float pressure, float temperature, float humidity) {
         this.pressure = pressure;
+        this.temperature = temperature;
         this.humidity = humidity;
     }
 
