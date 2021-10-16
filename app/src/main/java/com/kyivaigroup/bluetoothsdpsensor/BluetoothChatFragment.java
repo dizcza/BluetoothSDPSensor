@@ -62,8 +62,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * This fragment controls Bluetooth to communicate with other devices.
@@ -204,6 +207,39 @@ public class BluetoothChatFragment extends Fragment {
             }
         }
     }
+
+    private static class LogArrayAdapter extends ArrayAdapter<String> {
+
+        private final Pattern mLogPattern = Pattern.compile("[EIW] \\(\\d+\\)");
+        private final Map<Character, Integer> mColorMap = new HashMap<>();
+        private Integer mDefaultColor;
+
+        public LogArrayAdapter(@NonNull Context context, int resource) {
+            super(context, resource);
+            mColorMap.put('E', Color.rgb(170, 0, 0));
+            mColorMap.put('I', Color.rgb(0, 170, 0));
+            mColorMap.put('W', Color.rgb(170, 85, 0));
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView textView = (TextView) super.getView(position, convertView, parent);
+            if (mDefaultColor == null) {
+                mDefaultColor = textView.getCurrentTextColor();
+            }
+            String text = textView.getText().toString();
+            text = text.replaceAll("(\\u001B\\[0;3\\dm|\\u001B\\[0m)", "");
+            textView.setText(text);
+            if (mLogPattern.matcher(text).find()) {
+                Integer color = mColorMap.get(text.charAt(0));
+                textView.setTextColor(color);
+            } else {
+                textView.setTextColor(mDefaultColor);
+            }
+            return textView;
+        }
+    }
+
 
     private void saveChart() {
         List<Entry> entries = mLineChart.getChartEntries();
@@ -371,6 +407,9 @@ public class BluetoothChatFragment extends Fragment {
         if (collection.sdcardFreeMB != 0) {
             mTextViewSDCardFreeMB.setText(activity.getString(R.string.sdcard_free_mb, collection.sdcardFreeMB));
         }
+        if (collection.log.length() > 0) {
+            mConversationArrayAdapter.add(collection.log);
+        }
     }
 
     /**
@@ -382,7 +421,7 @@ public class BluetoothChatFragment extends Fragment {
         if (activity == null) {
             return;
         }
-        mConversationArrayAdapter = new ArrayAdapter<>(activity, R.layout.message);
+        mConversationArrayAdapter = new LogArrayAdapter(activity, R.layout.message);
 
         mConversationView.setAdapter(mConversationArrayAdapter);
 

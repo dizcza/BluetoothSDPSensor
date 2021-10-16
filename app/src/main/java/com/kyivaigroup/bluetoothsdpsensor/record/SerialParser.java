@@ -1,5 +1,7 @@
 package com.kyivaigroup.bluetoothsdpsensor.record;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -8,6 +10,8 @@ import java.util.regex.Pattern;
 
 public class SerialParser {
     private final StringBuilder mCommand = new StringBuilder();
+    private final StringBuilder mLog = new StringBuilder();
+
     private final List<RecordDP> mRecordsDP = new ArrayList<>();
     private final List<RecordP> mRecordsP = new ArrayList<>();
     private final List<Float> mTemperatures = new ArrayList<>();
@@ -45,7 +49,7 @@ public class SerialParser {
     }
 
     public RecordCollection consumeRecords() {
-        RecordCollection collection = new RecordCollection(mRecordsDP, mRecordsP, mTemperatures, mRecordsStatus);
+        RecordCollection collection = new RecordCollection(mRecordsDP, mRecordsP, mTemperatures, mRecordsStatus, mLog.toString());
         if (mSensorInfo != null) {
             collection.sensorInfo = mSensorInfo;
             collection.sdcardFreeMB = mSDCardFreeMB;
@@ -55,6 +59,7 @@ public class SerialParser {
         mRecordsP.clear();
         mTemperatures.clear();
         mRecordsStatus.clear();
+        mLog.setLength(0);
         return collection;
     }
 
@@ -134,6 +139,10 @@ public class SerialParser {
                     mSensorInfo = new SensorInfo(modelNum, rangePa, pressureScale);
                     break;
                 }
+                break;
+            }
+            default: {
+                mLog.append(mCommand);
                 break;
             }
         }
