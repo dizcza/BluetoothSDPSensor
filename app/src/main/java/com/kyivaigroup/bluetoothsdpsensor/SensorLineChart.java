@@ -132,7 +132,7 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
     }
 
     public synchronized List<Entry> getChartEntries() {
-        return mChartEntries;
+        return new ArrayList<>(mChartEntries);
     }
 
     public synchronized void pause() {

@@ -311,12 +311,11 @@ public class BluetoothChatService {
      * It handles all incoming and outgoing transmissions.
      */
     private class ConnectedThread extends Thread {
-        private final Object mPauseLock = new Object();
-        private boolean mPaused = false;
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
         private final SerialParser mmSerialParser = new SerialParser();
+        private int mBytesReceivedMax = 1000;  // omit printing small values
 
         public ConnectedThread(BluetoothSocket socket) {
             mmSocket = socket;
@@ -341,15 +340,14 @@ public class BluetoothChatService {
         public void run() {
             byte[] buffer = new byte[16284];
             int nbytes;
-            int nbytesMax = 1000;  // omit printing small values
 
             // Keep listening to the InputStream while connected
             while (mState == STATE_CONNECTED) {
                 try {
                     // Read from the InputStream
                     nbytes = mmInStream.read(buffer);
-                    if (nbytes > nbytesMax) {
-                        nbytesMax = nbytes;
+                    if (nbytes > mBytesReceivedMax) {
+                        mBytesReceivedMax = nbytes;
                         Log.i(TAG, String.format("RX %d bytes", nbytes));
                     }
 
@@ -368,33 +366,6 @@ public class BluetoothChatService {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                synchronized (mPauseLock) {
-                    while (mPaused) {
-                        try {
-                            mPauseLock.wait();
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                }
-            }
-        }
-
-        /**
-         * Call this on pause.
-         */
-        public void onPause() {
-            synchronized (mPauseLock) {
-                mPaused = true;
-            }
-        }
-
-        /**
-         * Call this on resume.
-         */
-        public void onResume() {
-            synchronized (mPauseLock) {
-                mPaused = false;
-                mPauseLock.notifyAll();
             }
         }
 
@@ -428,13 +399,13 @@ public class BluetoothChatService {
 
     public void onPause() {
         if (mConnectedThread != null) {
-            mConnectedThread.onPause();
+            mConnectedThread.cancel();
         }
     }
 
     public void onResume() {
         if (mConnectedThread != null) {
-            mConnectedThread.onResume();
+            mConnectedThread.start();
         }
     }
 }
