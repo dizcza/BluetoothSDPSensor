@@ -14,6 +14,7 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordCollection;
 import com.kyivaigroup.bluetoothsdpsensor.record.RecordSDP;
+import com.kyivaigroup.bluetoothsdpsensor.record.SensorInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,11 +103,12 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
     }
 
     public synchronized void update(RecordCollection collection) {
-        if (collection.sensorInfo != null) {
+        if (collection.deviceInfo != null) {
             Description description = new Description();
-            description.setText(collection.sensorInfo.toString());
+            SensorInfo sensorInfo = collection.deviceInfo.sensorInfo;
+            description.setText(sensorInfo.toString());
             setDescription(description);
-            rescaleY(collection.sensorInfo.pressureScale);
+            rescaleY(sensorInfo.pressureScale);
         }
         for (RecordSDP record : collection.recordsSDP) {
             if (mState != State.INACTIVE) {

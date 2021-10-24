@@ -16,13 +16,12 @@ public class SerialParser {
     private final List<RecordSDP> mRecordsSDP = new ArrayList<>();
     private final List<RecordBMP> mRecordsBMP = new ArrayList<>();
     private final List<RecordStatus> mRecordsStatus = new ArrayList<>();
-    private SensorInfo mSensorInfo;
-    private long mSDCardFreeMB = 0;
+    private DeviceInfo mDeviceInfo;
 
     private final static Pattern patternSDP = Pattern.compile("D(-?\\d+)t(\\d+)");
     private final static Pattern patternBMP = Pattern.compile("P(\\d+)T(\\d+\\.\\d)H(\\d+\\.\\d)");
-    private final static Pattern patternStatus = Pattern.compile("S(\\d+)m(\\d+)r(\\d+)");
-    private final static Pattern patternInfo = Pattern.compile("I(\\d+)r(\\d+)s(\\d+)m(\\d+)");
+    private final static Pattern patternStatus = Pattern.compile("S(\\d+) m(\\d+) r(\\d+)");
+    private final static Pattern patternInfo = Pattern.compile("I(\\d+) r(\\d+) s(\\d+) i(\\d+) m(\\d+)");
     private final static Pattern patternClock = Pattern.compile("C(\\d+)");
     private final static Pattern patternLog = Pattern.compile("\\u001B\\[0m");
 
@@ -57,10 +56,9 @@ public class SerialParser {
             logs = Arrays.copyOf(logs, logs.length - 1);
         }
         RecordCollection collection = new RecordCollection(mRecordsSDP, mRecordsBMP, mRecordsStatus, logs);
-        if (mSensorInfo != null) {
-            collection.sensorInfo = mSensorInfo;
-            collection.sdcardFreeMB = mSDCardFreeMB;
-            mSensorInfo = null;  // obtain the info only once
+        if (mDeviceInfo != null) {
+            collection.deviceInfo = mDeviceInfo;
+            mDeviceInfo = null;  // obtain the info only once
         }
         mRecordsSDP.clear();
         mRecordsBMP.clear();
@@ -124,14 +122,16 @@ public class SerialParser {
                 break;
             }
             case 'I': {
-                // Sensor info: I<model_number:int>r<range_pa:int>s<pressure_scale:int>
+                // Sensor info: I<model_number:int> r<range_pa:int> s<pressure_scale:int> i<record_id:int> m<memory_free:long>
                 Matcher matcher = patternInfo.matcher(mCommand);
                 if (matcher.matches()) {
                     int modelNum = Integer.parseInt(matcher.group(1));
                     int rangePa = Integer.parseInt(matcher.group(2));
                     int pressureScale = Integer.parseInt(matcher.group(3));
-                    mSDCardFreeMB = Long.parseLong(matcher.group(4)) / (1 << 20);
-                    mSensorInfo = new SensorInfo(modelNum, rangePa, pressureScale);
+                    int recordId = Integer.parseInt(matcher.group(4));
+                    long sdcardFree = Long.parseLong(matcher.group(5)) / (1 << 20);
+                    SensorInfo sensorInfo = new SensorInfo(modelNum, rangePa, pressureScale);
+                    mDeviceInfo = new DeviceInfo(sensorInfo, recordId, sdcardFree);
                     break;
                 }
                 break;

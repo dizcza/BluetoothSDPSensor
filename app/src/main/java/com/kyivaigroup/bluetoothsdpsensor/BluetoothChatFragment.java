@@ -259,6 +259,7 @@ public class BluetoothChatFragment extends Fragment {
                 pw.println(String.format("%.6f,%.4f", entry.getX(), entry.getY()));
             }
             pw.close();
+            Toast.makeText(getActivity(), "Saved", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -400,8 +401,9 @@ public class BluetoothChatFragment extends Fragment {
             mTextViewStatusQueueSize.setText(activity.getString(R.string.status_queue_size, status.messagesCurr, status.messagesMax));
             mTextViewStatusReadSensor.setText(activity.getString(R.string.status_read_sensor, status.readDurationMax));
         }
-        if (collection.sdcardFreeMB != 0) {
-            mConversationArrayAdapter.add(activity.getString(R.string.sdcard_free_mb, collection.sdcardFreeMB));
+        if (collection.deviceInfo != null) {
+            mConversationArrayAdapter.add(activity.getString(R.string.record_id, collection.deviceInfo.recordId));
+            mConversationArrayAdapter.add(activity.getString(R.string.sdcard_free_mb, collection.deviceInfo.sdcardFreeMB));
         }
         if (collection.logs.length > 0) {
             mConversationArrayAdapter.addAll(collection.logs);

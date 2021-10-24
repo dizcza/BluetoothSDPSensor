@@ -7,8 +7,7 @@ public class RecordCollection {
     public final RecordSDP[] recordsSDP;
     public final RecordBMP recordBMP;
     public final RecordStatus status;
-    public SensorInfo sensorInfo;
-    public long sdcardFreeMB;
+    public DeviceInfo deviceInfo;
     public final String[] logs;
 
     public RecordCollection(List<RecordSDP> recordsSDP, List<RecordBMP> recordBMP,
@@ -17,7 +16,6 @@ public class RecordCollection {
         this.recordBMP = recordBMP.size() > 0 ? recordBMP.get(recordBMP.size() - 1) : null;
         this.status = statuses.size() > 0 ? statuses.get(statuses.size() - 1) : null;
         this.logs = logs;
-        this.sensorInfo = null;
-        this.sdcardFreeMB = 0;
+        this.deviceInfo = null;
     }
 }
