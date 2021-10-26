@@ -32,5 +32,6 @@
     <string name="sdcard_free_mb">SD card free size: <xliff:g id="sdcard_free" example="0">%d</xliff:g>MB</string>
     <string name="save_btn">Save</string>
     <string name="show_saved">Show saved charts</string>
+    <string name="tag_save_hint">Tag</string>
 
 </resources>

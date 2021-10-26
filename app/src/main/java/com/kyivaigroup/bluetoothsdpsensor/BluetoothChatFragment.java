@@ -89,6 +89,7 @@ public class BluetoothChatFragment extends Fragment {
     private MenuItem mConnectMenu;
     private SavedChartsFragment mSavedChartsFragment;
     private Button mSaveGraphBtn;
+    private EditText mTagSave;
 
     /**
      * Array adapter for the conversation thread
@@ -240,15 +241,25 @@ public class BluetoothChatFragment extends Fragment {
 
 
     private void saveChart() {
+        String tag = mTagSave.getText().toString();
+        mTagSave.setText("");
+        if (!tag.equals("")) {
+            tag = " " + tag;
+        }
+
         List<Entry> entries = mLineChart.getChartEntries();
         if (entries.size() == 0) {
             // no entries in the chart
+            Toast.makeText(getActivity(), "No data", Toast.LENGTH_SHORT).show();
             return;
         }
         File root = android.os.Environment.getExternalStorageDirectory();
         File records = new File(root.getAbsolutePath(), Constants.SDP_RECORDS_FOLDER);
         records.mkdirs();
-        String fileName = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss'.txt'").format(new Date());
+
+        Locale locale = Locale.getDefault();
+        String pattern = String.format(locale, "yyyy.MM.dd HH:mm:ss'%s.txt'", tag);
+        String fileName = new SimpleDateFormat(pattern, locale).format(new Date());
         File file = new File(records, fileName);
 
         try {
@@ -256,7 +267,7 @@ public class BluetoothChatFragment extends Fragment {
             PrintWriter pw = new PrintWriter(fos);
             pw.println(mLineChart.getDescription().getText());
             for (Entry entry : entries) {
-                pw.println(String.format("%.6f,%.4f", entry.getX(), entry.getY()));
+                pw.println(String.format(locale, "%.6f,%.4f", entry.getX(), entry.getY()));
             }
             pw.close();
             Toast.makeText(getActivity(), "Saved", Toast.LENGTH_SHORT).show();
@@ -347,9 +358,9 @@ public class BluetoothChatFragment extends Fragment {
         mConversationView = view.findViewById(R.id.sent_commands_list);
         mConversationView.setEmptyView(view.findViewById(R.id.empty_list_item));
 
+        mTagSave = view.findViewById(R.id.tag_save);
+
         mSaveGraphBtn = view.findViewById(R.id.save_btn);
-        mSaveGraphBtn.setBackgroundColor(Color.LTGRAY);
-        mSaveGraphBtn.setEnabled(false);
         final ActivityResultLauncher<String> requestWriteExternal =
                 registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                     if (isGranted) {
@@ -380,11 +391,6 @@ public class BluetoothChatFragment extends Fragment {
 
     private void onRecordsReceived(RecordCollection collection) {
         mLineChart.update(collection);
-        Context context = getContext();
-        if (context != null) {
-            mSaveGraphBtn.setBackgroundColor(context.getResources().getColor(R.color.ic_launcher_background));
-        }
-        mSaveGraphBtn.setEnabled(true);
         Activity activity = getActivity();
         if (activity == null) {
             return;
