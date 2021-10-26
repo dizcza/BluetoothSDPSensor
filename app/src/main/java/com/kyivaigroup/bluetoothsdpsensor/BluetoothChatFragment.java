@@ -36,6 +36,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -88,7 +89,6 @@ public class BluetoothChatFragment extends Fragment {
     private TextView mTextViewStatusReadSensor;
     private MenuItem mConnectMenu;
     private SavedChartsFragment mSavedChartsFragment;
-    private Button mSaveGraphBtn;
     private EditText mTagSave;
 
     /**
@@ -358,9 +358,15 @@ public class BluetoothChatFragment extends Fragment {
         mConversationView = view.findViewById(R.id.sent_commands_list);
         mConversationView.setEmptyView(view.findViewById(R.id.empty_list_item));
 
+        CheckBox filterOutliersCheckBox = view.findViewById(R.id.filter_outliers);
+        mLineChart.setFilterOutliers(filterOutliersCheckBox.isChecked());
+        filterOutliersCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mLineChart.setFilterOutliers(isChecked);
+        });
+
         mTagSave = view.findViewById(R.id.tag_save);
 
-        mSaveGraphBtn = view.findViewById(R.id.save_btn);
+        final Button saveGraphBtn = view.findViewById(R.id.save_btn);
         final ActivityResultLauncher<String> requestWriteExternal =
                 registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                     if (isGranted) {
@@ -369,7 +375,7 @@ public class BluetoothChatFragment extends Fragment {
                         Toast.makeText(getActivity(), "Could not save the chart", Toast.LENGTH_SHORT).show();
                     }
                 });
-        mSaveGraphBtn.setOnClickListener(buttonView -> {
+        saveGraphBtn.setOnClickListener(buttonView -> {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 saveChart();
             } else {

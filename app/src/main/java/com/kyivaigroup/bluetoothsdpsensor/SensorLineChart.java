@@ -21,6 +21,8 @@ import java.util.List;
 
 public class SensorLineChart extends LineChart implements OnChartGestureListener {
     private static final long UPDATE_PERIOD_MS = 2000;
+    private static final float FILTER_OUTLIER_TOLERANCE = 0.2f;
+    private static final float FILTER_OUTLIER_AMPL_PA = 1.0f;
     private static final String CHART_LABEL = "Differential pressure, Pa";
 
     private final List<Entry> mChartEntries = new ArrayList<>();
@@ -28,6 +30,7 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
     private State mState = State.CLEARED;
     private long mLastUpdate = 0;
     private long mTimeShift = 0;
+    private boolean mFilterOutliers = true;
 
     public enum State {
         CLEARED,   // waiting for sensory data
@@ -62,6 +65,10 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
         return mState != State.INACTIVE;
     }
 
+    public synchronized void setFilterOutliers(boolean filterOutliers) {
+        mFilterOutliers = filterOutliers;
+    }
+
     public void prepare(Context context) {
         setNoDataText("Waiting for sensor data...");
         setDescription(null);
@@ -69,6 +76,22 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
         Paint paint = getPaint(LineChart.PAINT_INFO);
         paint.setColor(appColor);
         setOnChartGestureListener(this);
+    }
+
+    private List<Entry> filterOutliers() {
+        List<Entry> filtered = new ArrayList<>();
+        for (int i = 1; i < mChartEntries.size() - 1; i++) {
+            float ddpL = mChartEntries.get(i).getY() - mChartEntries.get(i - 1).getY();
+            float ddpR = mChartEntries.get(i + 1).getY() - mChartEntries.get(i).getY();
+            boolean outlier = ddpL * ddpR < 0;
+            float scale = Math.abs(ddpL / (ddpR + 1e-10f));
+            outlier &= (scale > 1 - FILTER_OUTLIER_TOLERANCE) && (scale < 1 + FILTER_OUTLIER_TOLERANCE);
+            outlier &= 0.5 * (Math.abs(ddpL) + Math.abs(ddpR)) > FILTER_OUTLIER_AMPL_PA;
+            if (!outlier) {
+                filtered.add(mChartEntries.get(i));
+            }
+        }
+        return filtered;
     }
 
     /**
@@ -123,7 +146,8 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
         long tick = System.currentTimeMillis();
         if ((mState != State.INACTIVE) && (tick > mLastUpdate + UPDATE_PERIOD_MS)) {
             // either CLEARED or ACTIVE state
-            LineDataSet dataset = new LineDataSet(new ArrayList<>(mChartEntries), CHART_LABEL);
+            List<Entry> entries = mFilterOutliers ? filterOutliers() : new ArrayList<>(mChartEntries);
+            LineDataSet dataset = new LineDataSet(entries, CHART_LABEL);
             LineData data = new LineData(dataset);
             setData(data);
             invalidate();

@@ -33,5 +33,6 @@
     <string name="save_btn">Save</string>
     <string name="show_saved">Show saved charts</string>
     <string name="tag_save_hint">Tag</string>
+    <string name="filter_outliers">Filter outliers</string>
 
 </resources>
