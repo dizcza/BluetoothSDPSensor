@@ -248,7 +248,7 @@ public class BluetoothChatFragment extends Fragment {
         }
 
         List<Entry> entries = mLineChart.getChartEntries();
-        if (entries.size() == 0) {
+        if (entries == null || entries.size() == 0) {
             // no entries in the chart
             Toast.makeText(getActivity(), "No data", Toast.LENGTH_SHORT).show();
             return;

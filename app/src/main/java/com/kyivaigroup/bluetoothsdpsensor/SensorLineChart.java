@@ -26,6 +26,7 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
     private static final String CHART_LABEL = "Differential pressure, Pa";
 
     private final List<Entry> mChartEntries = new ArrayList<>();
+    private List<Entry> mChartEntriesSaved;
     private int mPressureScale = 60;  // default pressure scale for SDP31
     private State mState = State.CLEARED;
     private long mLastUpdate = 0;
@@ -146,8 +147,8 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
         long tick = System.currentTimeMillis();
         if ((mState != State.INACTIVE) && (tick > mLastUpdate + UPDATE_PERIOD_MS)) {
             // either CLEARED or ACTIVE state
-            List<Entry> entries = mFilterOutliers ? filterOutliers() : new ArrayList<>(mChartEntries);
-            LineDataSet dataset = new LineDataSet(entries, CHART_LABEL);
+            mChartEntriesSaved = mFilterOutliers ? filterOutliers() : new ArrayList<>(mChartEntries);
+            LineDataSet dataset = new LineDataSet(mChartEntriesSaved, CHART_LABEL);
             LineData data = new LineData(dataset);
             setData(data);
             invalidate();
@@ -158,7 +159,7 @@ public class SensorLineChart extends LineChart implements OnChartGestureListener
     }
 
     public synchronized List<Entry> getChartEntries() {
-        return new ArrayList<>(mChartEntries);
+        return mChartEntriesSaved;
     }
 
     public synchronized void pause() {
