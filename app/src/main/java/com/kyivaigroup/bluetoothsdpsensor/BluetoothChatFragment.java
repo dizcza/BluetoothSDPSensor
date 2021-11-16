@@ -36,7 +36,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -357,12 +356,6 @@ public class BluetoothChatFragment extends Fragment {
 
         mConversationView = view.findViewById(R.id.sent_commands_list);
         mConversationView.setEmptyView(view.findViewById(R.id.empty_list_item));
-
-        CheckBox filterOutliersCheckBox = view.findViewById(R.id.filter_outliers);
-        mLineChart.setFilterOutliers(filterOutliersCheckBox.isChecked());
-        filterOutliersCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            mLineChart.setFilterOutliers(isChecked);
-        });
 
         mTagSave = view.findViewById(R.id.tag_save);
 
